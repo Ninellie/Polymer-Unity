@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d218a9fc12dc424d8da6f20dbf7a89c5, type: 3}
+  m_Name: Button Style
+  m_EditorClassIdentifier: 
+  colorBlock:
+    m_NormalColor: {r: 1, g: 0.8509804, b: 0, a: 1}
+    m_HighlightedColor: {r: 1, g: 0.47843137, b: 0, a: 1}
+    m_PressedColor: {r: 1, g: 0.47843137, b: 0, a: 1}
+    m_SelectedColor: {r: 1, g: 0.47843137, b: 0, a: 1}
+    m_DisabledColor: {r: 0.44, g: 0.20923077, b: 0, a: 1}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0
+  normalColor: {fileID: 11400000, guid: 3fa7f4d9b3ac49144a7dc2b2dc23418c, type: 2}
+  highlightedColor: {fileID: 11400000, guid: c7cef80387536714aa622c9e2292da5c, type: 2}
+  pressedColor: {fileID: 11400000, guid: c7cef80387536714aa622c9e2292da5c, type: 2}
+  selectedColor: {fileID: 11400000, guid: c7cef80387536714aa622c9e2292da5c, type: 2}
+  disabledColor: {fileID: 11400000, guid: d71e9bf1693ab8249b9b27928af2b7d3, type: 2}
