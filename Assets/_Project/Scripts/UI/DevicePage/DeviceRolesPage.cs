@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.Models;
 using Core.Services;
+using Polymer.UI.Routing;
 using TMPro;
 using UI.ListView;
 using UnityEngine;
@@ -9,7 +10,7 @@ using VContainer;
 
 namespace UI.DevicePage
 {
-    public class DeviceRolesPage : MonoBehaviour
+    public class DeviceRolesPage : PageBase
     {
         [Header("Inner components links")]
         [SerializeField] private TMP_Text header;
@@ -75,6 +76,10 @@ namespace UI.DevicePage
         private void OnDisable()
         {
             Destroy(itemListRenderer);
+        }
+
+        public override void OnPageInit(PageArgs args)
+        {
         }
     }
 }
