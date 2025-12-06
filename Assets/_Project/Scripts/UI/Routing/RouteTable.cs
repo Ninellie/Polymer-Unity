@@ -69,7 +69,7 @@ namespace Polymer.UI.Routing
             return (pathOnly, queryParams);
         }
 
-        private Dictionary<string, string> ParseQueryString(string query)
+        private static Dictionary<string, string> ParseQueryString(string query)
         {
             var dict = new Dictionary<string, string>();
             var parts = query.Split('&');
@@ -86,7 +86,7 @@ namespace Polymer.UI.Routing
             return dict;
         }
 
-        private Dictionary<string, string>? MatchRoute(string pattern, string path)
+        private static Dictionary<string, string>? MatchRoute(string pattern, string path)
         {
             var patternSegments = pattern.Trim('/').Split('/');
             var pathSegments = path.Trim('/').Split('/');

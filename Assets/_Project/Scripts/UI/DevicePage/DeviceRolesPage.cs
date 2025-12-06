@@ -19,8 +19,8 @@ namespace UI.DevicePage
         
         [Header("Prefabs")]
         [SerializeField] private ModalWindow modalWindowPrefab;
-        
-        [Inject] private DeviceRoleDataService DataService { get; set; }
+
+        [Inject] private DeviceRoleDataService _dataService;
         
         private ItemListDataProvider<DeviceRole> _itemListDataProvider;
 
@@ -34,9 +34,9 @@ namespace UI.DevicePage
             if (itemListRenderer == null) Debug.LogError("No item list renderer found");
         }
         
-        private void OnEnable()
+        private void Start()
         {
-            var deviceRoles = DataService.Get();
+            var deviceRoles = _dataService.Get();
             
             _itemListDataProvider = new ItemListDataProvider<DeviceRole>(
                 deviceRoles,
@@ -52,11 +52,13 @@ namespace UI.DevicePage
         {
             // Создать новое модальное окно
             var canvasTransform = GetComponentInParent<Canvas>().transform;
+            
             // Расположить окно поверх остальных
             var modalWindow = Instantiate(modalWindowPrefab, canvasTransform);
             var rectTransform = modalWindow.GetComponent<RectTransform>();
             rectTransform.SetAsLastSibling();
             rectTransform.ForceUpdateRectTransforms();
+            
             // Добавить нужные поля
             modalWindow.AddField(NameField, string.Empty);
             modalWindow.AddField(DescriptionField, string.Empty);
@@ -69,13 +71,8 @@ namespace UI.DevicePage
         {
             var deviceRoleName = fields[NameField];
             var deviceRoleDescription = fields[DescriptionField];
-            DataService.Create(deviceRoleName, deviceRoleDescription);
+            _dataService.Create(deviceRoleName, deviceRoleDescription);
             itemListRenderer.AddItemAtEnd(deviceRoleName, deviceRoleDescription);
-        }
-        
-        private void OnDisable()
-        {
-            Destroy(itemListRenderer);
         }
 
         public override void OnPageInit(PageArgs args)

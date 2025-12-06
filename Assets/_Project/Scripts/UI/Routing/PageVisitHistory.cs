@@ -8,9 +8,10 @@ namespace Polymer.UI
     /// </summary>
     public class PageVisitHistory
     {
+        private PageVisit _current;
+        
         private readonly Stack<PageVisit> _history = new();
         private readonly Stack<PageVisit> _forwardHistory = new();
-        private PageVisit _current;
         
         public void Init(PageVisit initialVisit)
         {

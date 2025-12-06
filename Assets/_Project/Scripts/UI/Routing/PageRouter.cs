@@ -23,7 +23,7 @@ namespace Polymer.UI.Routing
         
         public void Initialize()
         {
-            var initialPath = _settings.InitialPagePath;
+            var initialPath = _settings.initialPagePath;
             
             var initialMatch = _routeTable.Match(initialPath)
                                ?? throw new Exception($"Invalid initial route: {initialPath}");
@@ -69,11 +69,8 @@ namespace Polymer.UI.Routing
             var page = _pageResolver.Resolve(visit.PrefabPath, visit.Parameters);
             if (page == null)
             {
-                UnityEngine.Debug.LogError($"[PageRouter] Failed to resolve page: {visit.Path}");
-                return;
+                Debug.LogError($"[PageRouter] Failed to resolve page: {visit.Path}");
             }
-
-            // _lifecycleManager.ShowPage(page);
         }
     }
 }

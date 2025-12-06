@@ -2,9 +2,9 @@
 
 namespace Polymer.UI.Routing
 {
+    [CreateAssetMenu]
     public class PageRoutingSettings : ScriptableObject
     {
-        [SerializeField] private string initialPagePath;
-        public string InitialPagePath => initialPagePath;
+        [SerializeField] public string initialPagePath;
     }
 }

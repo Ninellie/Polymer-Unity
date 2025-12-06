@@ -8,9 +8,8 @@ namespace Polymer.UI.Routing
     /// </summary>
     public abstract class PageBase : MonoBehaviour
     {
-        [Inject]
-        public PageRouter Router { get; }
-        
+        [Inject] protected PageRouter _router;
+
         public abstract void OnPageInit(PageArgs args);
     }
 }

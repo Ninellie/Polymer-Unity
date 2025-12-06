@@ -30,7 +30,7 @@ namespace Core.Services
         private void SetupDataFilePath()
         {
             // Используем стандартный путь для данных приложения
-            string dataDirectory = Path.Combine(Application.persistentDataPath, "NetworkInfrastructure");
+            var dataDirectory = Path.Combine(Application.persistentDataPath, "NetworkInfrastructure");
             
             // Создаем директорию, если она не существует
             if (!Directory.Exists(dataDirectory))
@@ -65,7 +65,7 @@ namespace Core.Services
 
         private void LoadDataFromFile()
         {
-            string jsonContent = File.ReadAllText(_dataFilePath);
+            var jsonContent = File.ReadAllText(_dataFilePath);
             _dataProvider.Data = JsonUtility.FromJson<ApplicationData>(jsonContent);
             
             if (_dataProvider.Data == null)

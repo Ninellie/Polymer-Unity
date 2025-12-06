@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Polymer.UI.Routing
 {
@@ -10,10 +11,12 @@ namespace Polymer.UI.Routing
     public class PageResolver
     {
         private readonly Transform _root;
-
-        public PageResolver([Key("PageRoot")] Transform root)
+        private readonly IObjectResolver _resolver;
+        
+        public PageResolver([Key("PageRoot")] Transform root, IObjectResolver resolver)
         {
             _root = root;
+            _resolver = resolver;
         }
         
         /// <summary>
@@ -22,6 +25,7 @@ namespace Polymer.UI.Routing
         public PageBase Resolve(string prefabPath, Dictionary<string, object> parameters)
         {
             var prefab = Resources.Load<GameObject>(prefabPath);
+            
             if (prefab == null)
             {
                 Debug.LogError($"[PageResolver] Prefab not found at path: {prefabPath}");
@@ -29,6 +33,7 @@ namespace Polymer.UI.Routing
             }
 
             var instance = Object.Instantiate(prefab, _root);
+            _resolver.InjectGameObject(instance);
             var page = instance.GetComponent<PageBase>();
             if (page == null)
             {
