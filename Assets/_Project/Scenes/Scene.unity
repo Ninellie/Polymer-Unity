@@ -642,13 +642,130 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7713bf2ea539498996865a65cf18c7c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  repulsionForce: 100
-  attractionForce: 10
-  centralGravity: 5
-  damping: 0.85
-  maxVelocity: 5
-  nodes: []
+  jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
+  nodes:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   container: {fileID: 737332996}
+  testNodeCount: 100
+  testNodeRadius: 10
+  testNodeSegments: 64
+  testNodeLineWidth: 2
+  testNodeColor: {r: 0.89411765, g: 0.10818823, b: 0.37016484, a: 1}
+  testNodeSize: {x: 100, y: 100}
+  createTestNodesOnAwake: 1
+  attractionForce: 0.5
+  extraRepulsionFactor: 70
+  deltaTimeMultiplier: 1
+  processCountPerFrame: 1
+  stabilizationThreshold: 1
+  stabilizationTime: 4
+  blopPower: 250
+  blopRadius: 150
+  mode: 2
+  currentState: 0
+  lastAttractionForce: 0
+  lastExtraRepulsionFactor: 0
+  globalDamping: 0
+  simulationElapsedTime: 0
 --- !u!1 &830225399
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,7 +987,7 @@ Canvas:
   m_GameObject: {fileID: 1438634820}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 620791378}
   m_PlaneDistance: 100
   m_PixelPerfect: 1
