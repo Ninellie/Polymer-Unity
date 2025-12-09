@@ -757,7 +757,7 @@ MonoBehaviour:
   deltaTimeMultiplier: 1
   processCountPerFrame: 1
   stabilizationThreshold: 1
-  stabilizationTime: 4
+  stabilizationTime: 10
   blopPower: 250
   blopRadius: 150
   mode: 2

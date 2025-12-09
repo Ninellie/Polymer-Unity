@@ -8,8 +8,8 @@ namespace UI.DevicePage
     [RequireComponent(typeof(RectTransform))]
     public class UINode : Graphic, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
+        public int id;
         public Vector2 Velocity;
-        // public RectTransform rectTransform => gameObject.GetComponent<RectTransform>();
         public float radius = 50f;
         public int segments = 64;
         public float lineWidth = 2f;
@@ -17,12 +17,6 @@ namespace UI.DevicePage
         public bool dragged;
 
         public Color color;
-        
-        // private void Awake()
-        // {
-        //     var a = gameObject.AddComponent<Image>();
-        //     a.color = color;
-        // }
 
         protected override void OnPopulateMesh(VertexHelper vh)
         {

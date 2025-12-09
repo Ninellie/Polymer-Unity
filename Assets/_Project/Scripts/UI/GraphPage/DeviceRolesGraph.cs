@@ -1,44 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Polymer.UI.Routing;
 using TMPro;
 using TriInspector;
+using UnityEditor;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 namespace UI.DevicePage
 {
-    [Serializable]
-    public class Device
-    {
-        public int id;
-        public string name;
-        public string role;
-        public string color;
-    }
-
-    [Serializable]
-    public class Connection
-    {
-        public int a;
-        public int b;
-    }
-
-    [Serializable]
-    public class NetworkModel
-    {
-        public List<Device> devices;
-        public List<Connection> connections;
-    }
-    
-    public class NetworkLoader : MonoBehaviour
-    {
-        public TextAsset jsonFile;
-        public NetworkModel Model { get; private set; }
-
-    }
-    
     [RequireComponent(typeof(RectTransform))]
     public class DeviceRolesGraph : PageBase
     {
@@ -351,27 +322,33 @@ namespace UI.DevicePage
             ClearGraph();
             
             var center = container.rect.center;
-
-            for (var i = 0; i < testNodeCount; i++)
+            
+            foreach (var device in _model.devices)
             {
-                var nodeObj = new GameObject("Node_" + i);
+                var nodeObj = new GameObject(device.name);
                 
                 nodeObj.transform.SetParent(container, false);
-
-                var rt = nodeObj.AddComponent<RectTransform>();
-                rt.anchoredPosition = center + Random.insideUnitCircle;
-                rt.sizeDelta = testNodeSize;
-                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, testNodeRadius);
-                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, testNodeRadius);
+                
+                var nodeRectTransform = nodeObj.AddComponent<RectTransform>();
+                nodeRectTransform.anchoredPosition = center + Random.insideUnitCircle;
+                nodeRectTransform.sizeDelta = testNodeSize;
+                nodeRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, testNodeRadius);
+                nodeRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, testNodeRadius);
 
                 var node = nodeObj.AddComponent<UINode>();
                 node.radius = testNodeRadius;
                 node.segments = testNodeSegments;
                 node.lineWidth = testNodeLineWidth;
-                node.color = testNodeColor;
+                node.id = device.id;
+
+                if (ColorUtility.TryParseHtmlString(device.color, out var color))
+                {
+                    node.color = color;
+                }
+                
                 node.Velocity = Vector2.zero;
 
-                var textObj = new GameObject("Text");
+                var textObj = new GameObject("Text"); 
                 textObj.transform.SetParent(nodeObj.transform);
                 textObj.transform.localScale = new Vector3(1, 1, 1);
                 textObj.transform.position = new Vector3(0, 0, 0);
@@ -383,11 +360,10 @@ namespace UI.DevicePage
                 rectTransform.anchorMax = new Vector2(0.5f, 0);
                 rectTransform.sizeDelta = new Vector2(300, 50);
                 
-                
                 var label = textObj.AddComponent<TextMeshProUGUI>();
-                label.SetText("Node " + i);
+                label.SetText(device.role);
                 label.color = testNodeColor;
-                label.autoSizeTextContainer = false;
+                label.autoSizeTextContainer = true;
                 label.enableAutoSizing = false;
                 label.fontSizeMax = 25;
                 label.alignment = TextAlignmentOptions.Midline;
@@ -396,6 +372,10 @@ namespace UI.DevicePage
                 
                 nodes.Add(node);
             }
+
+            var nodeConnectionsGraphic = gameObject.AddComponent<NodeConnectionsGraphic>();
+            nodeConnectionsGraphic.connections = _model.connections;
+            nodeConnectionsGraphic.nodes = nodes;
             
             RestartSimulation();
         }
