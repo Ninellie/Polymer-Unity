@@ -648,10 +648,10 @@ MonoBehaviour:
   testNodeColor: {r: 0.89411765, g: 0.10818823, b: 0.37016484, a: 1}
   testNodeSize: {x: 100, y: 100}
   createTestNodesOnAwake: 1
-  repulsion: 0.6
-  link: 0.01
-  gravity: 0.12
-  linkDistance: 60
+  repulsion: 1
+  link: 0.1
+  gravity: 0.15
+  linkDistance: 50
   extraRepulsionFactor: 15
   deltaTimeMultiplier: 10
   processCountPerFrame: 1
