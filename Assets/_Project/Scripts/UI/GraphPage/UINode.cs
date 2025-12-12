@@ -1,4 +1,5 @@
 ﻿using System;
+using Core.Models;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -16,10 +17,12 @@ namespace UI.DevicePage
         public string label = string.Empty;
         public bool dragged;
 
+        public DeviceRolesGraph Graph { get; set; }
         public RectTransform RectTransform => drawer.rectTransform;
 
         public void OnDrag(PointerEventData eventData)
         {
+            Graph.RestartSimulation();
             transform.position = eventData.position;
         }
 

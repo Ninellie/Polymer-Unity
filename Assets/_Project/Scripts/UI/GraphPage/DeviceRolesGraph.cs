@@ -41,7 +41,7 @@ namespace UI.DevicePage
         [Header("Physics")]
         [Range(0, 1f)] [SerializeField] private float repulsion = 0.5f;
         [Range(0, 100f)] [SerializeField] private float link = 0.5f;
-        [Range(0, 100f)] [SerializeField] private float gravity = 0.5f;
+        [Range(0, 1f)] [SerializeField] private float gravity = 0.5f;
         [Range(50, 500f)] [SerializeField] private float linkDistance = 50f;
         [SerializeField] private float extraRepulsionFactor = 70f;
         
@@ -130,7 +130,7 @@ namespace UI.DevicePage
             RestartSimulation();
         }
         
-        private void Update()
+        private void FixedUpdate()
         {
             // HandleClick();
             CheckParameterChanges();
@@ -171,7 +171,7 @@ namespace UI.DevicePage
         {
             var deltaTime = Time.deltaTime * deltaTimeMultiplier;
             var thresholdSqr = (stabilizationThreshold * 0.1f) * (stabilizationThreshold * 0.1f);
-            
+            ApplySpringForces();
             foreach (var node in nodes)
             {
                 if (node.Value.dragged) continue;
@@ -181,7 +181,7 @@ namespace UI.DevicePage
                 
                 softForce += ComputeRepulsion(node.Value);
                 softForce += ComputeGravity(node.Value);
-                softForce += GetConnectionForce(node.Value.id, nodePosition, _model.connections, nodes, link);
+                // softForce += GetSpringForce(node.Value.id, nodePosition, _model.connections, nodes, link);
                 
                 node.Value.velocity += softForce * deltaTime;
                 node.Value.velocity *= (1f - globalDamping);
@@ -193,6 +193,7 @@ namespace UI.DevicePage
                 
                 node.Value.RectTransform.anchoredPosition += node.Value.velocity * deltaTime;
             }
+            
         }
 
         private void ApplyExtraRepulsion()
@@ -218,7 +219,7 @@ namespace UI.DevicePage
             currentState = SimulationState.Stabilized;
         }
 
-        private void RestartSimulation()
+        public void RestartSimulation()
         {
             currentState = SimulationState.Simulating;
             globalDamping = 0f;
@@ -275,11 +276,30 @@ namespace UI.DevicePage
         private Vector2 ComputeGravity(UINode node)
         {
             var direction = Vector2.zero - node.RectTransform.anchoredPosition;
-            return direction.normalized * gravity;
+            return direction * gravity;
         }
         
-            private static Vector2 GetConnectionForce(
-            int nodeId,
+        
+        private void ApplySpringForces()
+        {
+            foreach (var edge in _model.connections)
+            {
+                var a = nodes[edge.a];
+                var b = nodes[edge.b];
+
+                var delta = b.RectTransform.anchoredPosition - a.RectTransform.anchoredPosition;
+                var distance = delta.magnitude;
+                if (distance < 0.0001f) continue; // защита от деления на ноль
+
+                var displacement = distance - linkDistance;
+                var force = delta.normalized * (displacement * link);
+
+                a.velocity += force;
+                b.velocity -= force;
+            }
+        }
+        
+        private static Vector2 GetSpringForce(int nodeId,
             Vector2 nodePosition,
             List<Connection> allConnections,
             Dictionary<int, UINode> nodesById,
@@ -422,6 +442,7 @@ namespace UI.DevicePage
                     label.horizontalAlignment = HorizontalAlignmentOptions.Center;
                     label.verticalAlignment = VerticalAlignmentOptions.Middle;
 
+                    node.Graph = this;
                     nodes.Add(node.id, node);
                 }
 

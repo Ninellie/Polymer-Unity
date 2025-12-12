@@ -644,15 +644,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
   container: {fileID: 737332996}
-  testNodeRadius: 50
+  testNodeRadius: 15
   testNodeColor: {r: 0.89411765, g: 0.10818823, b: 0.37016484, a: 1}
   testNodeSize: {x: 100, y: 100}
   createTestNodesOnAwake: 1
-  repulsion: 0
-  link: 0
-  gravity: 0.653
-  extraRepulsionFactor: 70
-  deltaTimeMultiplier: 1
+  repulsion: 0.6
+  link: 0.01
+  gravity: 0.12
+  linkDistance: 60
+  extraRepulsionFactor: 35
+  deltaTimeMultiplier: 10
   processCountPerFrame: 1
   stabilizationThreshold: 1
   stabilizationTime: 10
