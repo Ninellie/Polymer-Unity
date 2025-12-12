@@ -1,9 +1,5 @@
-﻿using System;
-using Core.Models;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 namespace UI.DevicePage
 {
@@ -14,6 +10,7 @@ namespace UI.DevicePage
         public CircleDrawer drawer;
         public int id;
         public Vector2 velocity;
+        public Vector2 force;
         public string label = string.Empty;
         public bool dragged;
 

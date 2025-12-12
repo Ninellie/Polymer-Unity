@@ -16,7 +16,6 @@ namespace UI.DevicePage
         private NetworkModel _model;
         
         private readonly Dictionary<int, UINode> nodes = new();
-        private readonly HashSet<(UINode, UINode)> _edges = new();
 
         [Header("Graph Container")]
         [SerializeField] private RectTransform container;
@@ -29,14 +28,13 @@ namespace UI.DevicePage
         [SerializeField] private bool createTestNodesOnAwake = true;
         
         [Header("Physics")]
-        [Range(0, 1f)] [SerializeField] private float repulsion = 0.5f;
-        [Range(0, 100f)] [SerializeField] private float link = 0.5f;
+        [Range(0, 10f)] [SerializeField] private float repulsion = 0.5f;
+        [Range(0, 10f)] [SerializeField] private float link = 0.5f;
         [Range(0, 1f)] [SerializeField] private float gravity = 0.5f;
         [Range(50, 500f)] [SerializeField] private float linkDistance = 50f;
         [SerializeField] private float extraRepulsionFactor = 70f;
         
         [Range(0.01f, 10f)] [SerializeField] private float deltaTimeMultiplier = 1f;
-        [Range(1f, 10f)] [SerializeField] private float processCountPerFrame = 1;
         [Range(0.01f, 5f)] [SerializeField] private float stabilizationThreshold = 1f;
         [Range(0.1f, 10f)] [SerializeField] private float stabilizationTime = 5f;
         
@@ -59,15 +57,8 @@ namespace UI.DevicePage
 
         private Vector2 _previousBlopPosition = Vector2.zero;
 
-        private const float MaxVelocity = 100f;
-        
-        private void DeserializeData()
-        {
-            if (jsonFile == null) return;
-            _model = JsonUtility.FromJson<NetworkModel>(jsonFile.text);
-            Debug.Log($"JSON: devices count: {_model.devices.Count}. Connections count: {_model.connections.Count}");
-        }
-        
+        private const float MaxVelocity = 200f;
+
         private void Awake()
         {
             DeserializeData();
@@ -86,7 +77,7 @@ namespace UI.DevicePage
                 CreateTestNodes();
             }
         }
-        
+
         private void Start()
         {
             var uiActionMap = InputSystem.actions.FindActionMap("UI");
@@ -94,107 +85,88 @@ namespace UI.DevicePage
             _point = uiActionMap.FindAction("Point");
             uiActionMap.Enable();
         }
-        
-        private void HandleClick()
-        {
-            if (!_midClick.WasReleasedThisFrame()) return;
-            _previousBlopPosition = _point.ReadValue<Vector2>();
-            _previousBlopPosition *= new Vector2(0.9f, 1f);
-            _previousBlopPosition -= new Vector2(Screen.width, Screen.height) * 0.5f;
-            
-            foreach (var node in nodes)
-            {
-                if (node.Value.dragged)
-                {
-                    continue;
-                }
-                var nodePos = node.Value.RectTransform.anchoredPosition;
-                var delta = nodePos - _previousBlopPosition;
-                if (!(delta.magnitude < blopRadius)) continue;
-                var direction = delta.normalized;
-                var distanceTo = delta.magnitude;
-                var power = DistanceFalloff.Get(blopRadius, distanceTo, blopPower, mode);
-                
-                var repulsionForce = direction * power; 
-                node.Value.velocity += repulsionForce;
-            }
-            
-            RestartSimulation();
-        }
-        
+
         private void FixedUpdate()
         {
             // HandleClick();
-            CheckParameterChanges();
+            // CheckParameterChanges();
+            ApplyExtraRepulsion();
+            //
+            // if (currentState == SimulationState.Stabilized) return;
+            //
+            // simulationElapsedTime += Time.deltaTime;
+            // globalDamping = Mathf.Clamp01(simulationElapsedTime / stabilizationTime);
 
-            for (var i = 0; i < processCountPerFrame; i++)
-            {
-                if (currentState == SimulationState.Simulating)
-                {
-                    simulationElapsedTime += Time.deltaTime;
-                    globalDamping = Mathf.Clamp01(simulationElapsedTime / stabilizationTime);
-                    
-                    ApplyForces();
-                    CheckStabilization();
-                }
-                
-                ApplyExtraRepulsion();
-            }
-        }
-
-        private void CheckParameterChanges()
-        {
-            if (
-                !Mathf.Approximately(lastRepulsion, repulsion) ||
-                !Mathf.Approximately(lastGravity, gravity) ||
-                !Mathf.Approximately(lastLink, link) ||
-                !Mathf.Approximately(lastExtraRepulsionFactor, extraRepulsionFactor))
-            {
-                RestartSimulation();
-            }
-            
-            lastRepulsion = repulsion;
-            lastExtraRepulsionFactor = extraRepulsionFactor;
-            lastLink = link;
-            lastGravity = gravity;
-        }
-
-        private void ApplyForces()
-        {
-            var deltaTime = Time.deltaTime * deltaTimeMultiplier;
-            var thresholdSqr = (stabilizationThreshold * 0.1f) * (stabilizationThreshold * 0.1f);
-            ApplySpringForces();
             foreach (var node in nodes)
             {
-                if (node.Value.dragged) continue;
-                
-                var softForce = Vector2.zero;
-                
-                softForce += ComputeRepulsion(node.Value);
-                softForce += ComputeGravity(node.Value);
-                
-                node.Value.velocity += softForce * deltaTime;
-                node.Value.velocity *= (1f - globalDamping);
-                
-                if (node.Value.velocity.sqrMagnitude < thresholdSqr)
-                {
-                    node.Value.velocity = Vector2.zero;
-                }
+                node.Value.force = Vector2.zero;
             }
-            ClampVelocity();
+            
+            ApplySpringForces();
+            ApplyGravity();
+            ComputeRepulsion();
+
+            
+            
+            foreach (var node in nodes)
+            {
+                node.Value.velocity += node.Value.force * Time.deltaTime;
+                node.Value.velocity *= 1 - globalDamping;
+            }
+            
+            // ClampVelocity();
             MoveNodes();
+                
+            // CheckStabilization();
+        }
+
+        public void RestartSimulation()
+        {
+            currentState = SimulationState.Simulating;
+            globalDamping = 0f;
+            simulationElapsedTime = 0f;
+        }
+
+        private void ComputeRepulsion()
+        {
+            foreach (var node in nodes)
+            {
+                var result = Vector2.zero;
+                var posA = node.Value.RectTransform.anchoredPosition;
+
+                foreach (var other in nodes)
+                {
+                    if (other.Key == node.Key) continue;
+                    var posB = other.Value.RectTransform.anchoredPosition;
+                    var dir = posA - posB;
+                    var distanceSqr = dir.sqrMagnitude;
+                    if (distanceSqr < 0.0001f) continue;
+                    var distance = Mathf.Sqrt(distanceSqr);
+                    result += dir / distance * repulsion;
+                }
+
+                node.Value.force += result;
+            }
+        }
+
+        private void ApplyGravity()
+        {
+            foreach (var node in nodes)
+            {
+                var direction = Vector2.zero - node.Value.RectTransform.anchoredPosition;
+                node.Value.force += direction * gravity;
+            }
         }
 
         private void MoveNodes()
         {
-            var deltaTime = Time.deltaTime * deltaTimeMultiplier;
             foreach (var node in nodes)
             {
                 if (node.Value.dragged) continue;
-                node.Value.RectTransform.anchoredPosition += node.Value.velocity * deltaTime;
+                node.Value.RectTransform.anchoredPosition += node.Value.velocity * Time.deltaTime;
             }
         }
-        
+
         private void ClampVelocity()
         {
             foreach (var node in nodes)
@@ -209,8 +181,34 @@ namespace UI.DevicePage
             foreach (var node in nodes)
             {
                 if (node.Value.dragged) continue;
-                var extraRepulsion = ComputeExtraRepulsion(node.Value);
-                node.Value.RectTransform.anchoredPosition += extraRepulsion;
+                var displacement = Vector2.zero;
+                var posA = node.Value.RectTransform.anchoredPosition;
+                var dominantRange = node.Value.drawer.Radius + extraRepulsionFactor;
+                var dominantRangeSqr = dominantRange * dominantRange;
+
+                foreach (var other in nodes)
+                {
+                    if (other.Value.id == node.Value.id) continue;
+
+                    var posB = other.Value.RectTransform.anchoredPosition;
+                    var direction = posA - posB;
+                    var distanceSqr = direction.sqrMagnitude;
+
+                    if (!(distanceSqr < dominantRangeSqr)) continue;
+                
+                    var distance = Mathf.Sqrt(distanceSqr);
+                    
+                    if (distance < 0.0001f)
+                    {
+                        direction = Random.insideUnitCircle * 0.01f;
+                        distance = direction.magnitude;
+                    }
+                    
+                    var pushForce = (dominantRange - distance) * 0.1f;
+                    displacement += direction / distance * pushForce;
+                }
+
+                node.Value.RectTransform.anchoredPosition += displacement;
             }
         }
 
@@ -226,67 +224,6 @@ namespace UI.DevicePage
             currentState = SimulationState.Stabilized;
         }
 
-        public void RestartSimulation()
-        {
-            currentState = SimulationState.Simulating;
-            globalDamping = 0f;
-            simulationElapsedTime = 0f;
-        }
-
-        [ContextMenu("Reset Parameters to Default")]
-        public void ResetParametersToDefault()
-        {
-            repulsion = 0.5f;
-            extraRepulsionFactor = 50f;
-            deltaTimeMultiplier = 1f;
-            stabilizationThreshold = 1f;
-            stabilizationTime = 5f;
-            
-            lastRepulsion = repulsion;
-            lastExtraRepulsionFactor = extraRepulsionFactor;
-            lastLink = link;
-            lastGravity = gravity;
-            
-            RestartSimulation();
-        }
-
-        private Vector2 ComputeExtraRepulsion(UINode node)
-        {
-            var displacement = Vector2.zero;
-            var posA = node.RectTransform.anchoredPosition;
-            var dominantRange = node.drawer.Radius + extraRepulsionFactor;
-            var dominantRangeSqr = dominantRange * dominantRange;
-
-            foreach (var other in nodes)
-            {
-                if (other.Value == node) continue;
-
-                var posB = other.Value.RectTransform.anchoredPosition;
-                var direction = posA - posB;
-                var distanceSqr = direction.sqrMagnitude;
-
-                if (!(distanceSqr < dominantRangeSqr)) continue;
-                
-                var distance = Mathf.Sqrt(distanceSqr);
-                if (distance < 0.0001f)
-                {
-                    direction = Random.insideUnitCircle * 0.01f;
-                    distance = direction.magnitude;
-                }
-                var pushForce = (dominantRange - distance) * 0.1f;
-                displacement += direction / distance * pushForce;
-            }
-
-            return displacement;
-        }
-
-        private Vector2 ComputeGravity(UINode node)
-        {
-            var direction = Vector2.zero - node.RectTransform.anchoredPosition;
-            return direction * gravity;
-        }
-        
-        
         private void ApplySpringForces()
         {
             foreach (var edge in _model.connections)
@@ -301,87 +238,13 @@ namespace UI.DevicePage
                 var displacement = distance - linkDistance;
                 var force = delta.normalized * (displacement * link);
 
-                a.velocity += force;
-                b.velocity -= force;
+                a.force += force;
+                b.force -= force;
             }
-        }
-        
-        private static Vector2 GetSpringForce(int nodeId,
-            Vector2 nodePosition,
-            List<Connection> allConnections,
-            Dictionary<int, UINode> nodesById,
-            float power)
-        {
-            var result = Vector2.zero;
-
-            foreach (var connection in allConnections)
-            {
-                var otherId = connection.a == nodeId ? connection.b : connection.b == nodeId ? connection.a : -1;
-                if (otherId < 0) continue;
-                if (nodesById.TryGetValue(otherId, out var other))
-                {
-                    result += other.RectTransform.anchoredPosition - nodePosition;
-                }
-            }
-            
-            return result.sqrMagnitude > 0 ? result.normalized * power : Vector2.zero;
-        }
-        
-        private Vector2 ComputeRepulsion(UINode node)
-        {
-            var result = Vector2.zero;
-            var posA = node.RectTransform.anchoredPosition;
-
-            foreach (var other in nodes)
-            {
-                if (other.Value == node) continue;
-                var posB = other.Value.RectTransform.anchoredPosition;
-                var dir = posA - posB;
-                var distanceSqr = dir.sqrMagnitude;
-                if (distanceSqr < 0.0001f) continue;
-                var distance = Mathf.Sqrt(distanceSqr);
-                result += dir / distance * repulsion;
-            }
-
-            return result;
         }
 
         public override void OnPageInit(PageArgs args)
         {
-        }
-        
-        public void AddNode(UINode node)
-        {
-            if (!nodes.TryAdd(node.id, node)) return;
-            RestartSimulation();
-        }
-
-        public void RemoveNode(UINode node)
-        {
-            if (!nodes.Remove(node.id)) return;
-            _edges.RemoveWhere(e => e.Item1 == node || e.Item2 == node);
-            RestartSimulation();
-        }
-
-        public void AddEdge(UINode from, UINode to)
-        {
-            if (_edges.Contains((from, to)) || _edges.Contains((to, from))) return;
-            _edges.Add((from, to));
-            RestartSimulation();
-        }
-
-        public void RemoveEdge(UINode from, UINode to)
-        {
-            var removed = _edges.Remove((from, to)) || _edges.Remove((to, from));
-            if (!removed) return;
-            RestartSimulation();
-        }
-
-        public void SetNodePosition(UINode node, Vector2 position)
-        {
-            if (node == null) return;
-            node.RectTransform.anchoredPosition = position;
-            RestartSimulation();
         }
 
         [ContextMenu("Create Test Nodes")]
@@ -474,6 +337,33 @@ namespace UI.DevicePage
             RestartSimulation();
         }
 
+        private void HandleClick()
+        {
+            if (!_midClick.WasReleasedThisFrame()) return;
+            _previousBlopPosition = _point.ReadValue<Vector2>();
+            _previousBlopPosition *= new Vector2(0.9f, 1f);
+            _previousBlopPosition -= new Vector2(Screen.width, Screen.height) * 0.5f;
+            
+            foreach (var node in nodes)
+            {
+                if (node.Value.dragged)
+                {
+                    continue;
+                }
+                var nodePos = node.Value.RectTransform.anchoredPosition;
+                var delta = nodePos - _previousBlopPosition;
+                if (!(delta.magnitude < blopRadius)) continue;
+                var direction = delta.normalized;
+                var distanceTo = delta.magnitude;
+                var power = DistanceFalloff.Get(blopRadius, distanceTo, blopPower, mode);
+                
+                var repulsionForce = direction * power; 
+                node.Value.velocity += repulsionForce;
+            }
+            
+            RestartSimulation();
+        }
+
         private void ClearGraph()
         {
             foreach (var node in nodes)
@@ -490,7 +380,47 @@ namespace UI.DevicePage
             }
             
             nodes.Clear();
-            _edges.Clear();
+        }
+
+        [ContextMenu("Reset Parameters to Default")]
+        public void ResetParametersToDefault()
+        {
+            repulsion = 0.5f;
+            extraRepulsionFactor = 50f;
+            deltaTimeMultiplier = 1f;
+            stabilizationThreshold = 1f;
+            stabilizationTime = 5f;
+            
+            lastRepulsion = repulsion;
+            lastExtraRepulsionFactor = extraRepulsionFactor;
+            lastLink = link;
+            lastGravity = gravity;
+            
+            RestartSimulation();
+        }
+
+        private void CheckParameterChanges()
+        {
+            if (
+                !Mathf.Approximately(lastRepulsion, repulsion) ||
+                !Mathf.Approximately(lastGravity, gravity) ||
+                !Mathf.Approximately(lastLink, link) ||
+                !Mathf.Approximately(lastExtraRepulsionFactor, extraRepulsionFactor))
+            {
+                RestartSimulation();
+            }
+            
+            lastRepulsion = repulsion;
+            lastExtraRepulsionFactor = extraRepulsionFactor;
+            lastLink = link;
+            lastGravity = gravity;
+        }
+
+        private void DeserializeData()
+        {
+            if (jsonFile == null) return;
+            _model = JsonUtility.FromJson<NetworkModel>(jsonFile.text);
+            Debug.Log($"JSON: devices count: {_model.devices.Count}. Connections count: {_model.connections.Count}");
         }
     }
 }
