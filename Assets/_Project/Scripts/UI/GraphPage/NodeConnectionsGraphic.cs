@@ -8,8 +8,8 @@ namespace UI.DevicePage
     [RequireComponent(typeof(RectTransform))]
     public class NodeConnectionsGraphic : MaskableGraphic
     {
-        public List<Connection> connections;
-        public List<UINode> nodes;
+        public List<Connection> Connections { get; set; }
+        public Dictionary<int, UINode> Nodes { get; set; }
         public float lineWidth = 1f;
 
         private void Update()
@@ -22,14 +22,15 @@ namespace UI.DevicePage
         {
             vh.Clear();
 
-            foreach (var connection in connections)
+            foreach (var connection in Connections)
             {
-                var aNode = nodes.Find(x => x.id == connection.a);
-                var bNode = nodes.Find(x => x.id == connection.b);
+                var aNode = Nodes[connection.a];
+                var bNode = Nodes[connection.b];
 
                 if (aNode == null || bNode == null) continue;
 
-                DrawUILine(vh, aNode.rectTransform.anchoredPosition, bNode.rectTransform.anchoredPosition, lineWidth, color);
+                DrawUILine(vh, aNode.RectTransform.anchoredPosition,
+                    bNode.RectTransform.anchoredPosition, lineWidth, color);
             }
         }
 
