@@ -1,23 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Polymer.UI.Routing;
 using TMPro;
 using TriInspector;
-using UnityEditor;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace UI.DevicePage
 {
-    public class ForceDirectedLayoutForces
-    {
-        
-    }
-    
-    
     [RequireComponent(typeof(RectTransform))]
     public class DeviceRolesGraph : PageBase
     {
@@ -69,6 +59,8 @@ namespace UI.DevicePage
 
         private Vector2 _previousBlopPosition = Vector2.zero;
 
+        private const float MaxVelocity = 100f;
+        
         private void DeserializeData()
         {
             if (jsonFile == null) return;
@@ -177,11 +169,9 @@ namespace UI.DevicePage
                 if (node.Value.dragged) continue;
                 
                 var softForce = Vector2.zero;
-                var nodePosition = node.Value.RectTransform.anchoredPosition;
                 
                 softForce += ComputeRepulsion(node.Value);
                 softForce += ComputeGravity(node.Value);
-                // softForce += GetSpringForce(node.Value.id, nodePosition, _model.connections, nodes, link);
                 
                 node.Value.velocity += softForce * deltaTime;
                 node.Value.velocity *= (1f - globalDamping);
@@ -190,10 +180,28 @@ namespace UI.DevicePage
                 {
                     node.Value.velocity = Vector2.zero;
                 }
-                
+            }
+            ClampVelocity();
+            MoveNodes();
+        }
+
+        private void MoveNodes()
+        {
+            var deltaTime = Time.deltaTime * deltaTimeMultiplier;
+            foreach (var node in nodes)
+            {
+                if (node.Value.dragged) continue;
                 node.Value.RectTransform.anchoredPosition += node.Value.velocity * deltaTime;
             }
-            
+        }
+        
+        private void ClampVelocity()
+        {
+            foreach (var node in nodes)
+            {
+                if (node.Value.dragged) continue;
+                node.Value.velocity = Vector2.ClampMagnitude(node.Value.velocity, MaxVelocity);
+            }
         }
 
         private void ApplyExtraRepulsion()
@@ -208,7 +216,6 @@ namespace UI.DevicePage
 
         private void CheckStabilization()
         {
-            if (nodes.Count == 0) return;
             if (!(globalDamping >= 1f)) return;
             
             foreach (var node in nodes)
@@ -412,7 +419,19 @@ namespace UI.DevicePage
                     node.drawer = circleDrawer;
                     circleDrawer.Radius = testNodeRadius;
                     node.id = device.id;
-
+                    
+                    foreach (var connection in _model.connections)
+                    {
+                        if (connection.a == device.id)
+                        {
+                            circleDrawer.Radius *= 1.01f;
+                        }
+                        if (connection.b == device.id)
+                        {
+                            circleDrawer.Radius *= 1.01f;
+                        }
+                    }
+                    
                     if (ColorUtility.TryParseHtmlString(device.color, out var color))
                     {
                         circleDrawer.color = color;
