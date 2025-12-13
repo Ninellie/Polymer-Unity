@@ -3,9 +3,9 @@ using System;
 namespace UI.DevicePage
 {
     [Serializable]
-    public class Connection
+    public class Edge
     {
-        public int a;
-        public int b;
+        public Node a;
+        public Node b;
     }
 }

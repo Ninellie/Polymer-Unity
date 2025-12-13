@@ -5,7 +5,7 @@ namespace UI.DevicePage
 {
     [RequireComponent(typeof(CanvasRenderer))]
     [RequireComponent(typeof(RectTransform))]
-    public class UINode : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class Node : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public CircleDrawer drawer;
         public int id;

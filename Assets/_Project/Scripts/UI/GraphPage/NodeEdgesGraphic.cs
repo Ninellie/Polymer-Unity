@@ -6,10 +6,11 @@ namespace UI.DevicePage
 {
     [RequireComponent(typeof(CanvasRenderer))]
     [RequireComponent(typeof(RectTransform))]
-    public class NodeConnectionsGraphic : MaskableGraphic
+    public class NodeEdgesGraphic : MaskableGraphic
     {
-        public List<Connection> Connections { get; set; }
-        public Dictionary<int, UINode> Nodes { get; set; }
+        public List<Edge> edges { get; set; }
+        public Dictionary<int, Node> Nodes { get; set; }
+        
         public float lineWidth = 1f;
 
         private void Update()
@@ -22,10 +23,10 @@ namespace UI.DevicePage
         {
             vh.Clear();
 
-            foreach (var connection in Connections)
+            foreach (var edge in edges)
             {
-                var aNode = Nodes[connection.a];
-                var bNode = Nodes[connection.b];
+                var aNode = edge.a;
+                var bNode = edge.b;
 
                 if (aNode == null || bNode == null) continue;
 

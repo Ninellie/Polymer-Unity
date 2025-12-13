@@ -7,10 +7,28 @@ namespace UI.DevicePage
     [RequireComponent(typeof(RectTransform))]
     public class CircleDrawer : Graphic
     {
-        [field: SerializeField] public float Radius { get; set; } = 50f;
-        
         [SerializeField] private int segments = 64;
         [SerializeField] private float lineWidth = 2f;
+        
+        public float Radius
+        {
+            get => rectTransform.rect.size.magnitude / 2;
+            set
+            {
+                float diameter;
+                
+                if (value == 0)
+                {
+                    diameter = 0;
+                }
+                else
+                { 
+                    diameter = value / 2;
+                }
+
+                rectTransform.sizeDelta = new Vector2(diameter, diameter);
+            }
+        }
         
         protected override void OnPopulateMesh(VertexHelper vh)
         {
@@ -26,10 +44,10 @@ namespace UI.DevicePage
                 var angle = i * angleStep;
                 var cos = Mathf.Cos(angle);
                 var sin = Mathf.Sin(angle);
-        
+                
                 var outer = center + new Vector2(cos, sin) * Radius;
                 var inner = center + new Vector2(cos, sin) * (Radius - lineWidth);
-        
+            
                 var vOuter = UIVertex.simpleVert;
                 vOuter.color = color;
                 vOuter.position = outer;
