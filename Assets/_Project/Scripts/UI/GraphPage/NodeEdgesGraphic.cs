@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TriInspector;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,14 +9,24 @@ namespace UI.DevicePage
     [RequireComponent(typeof(RectTransform))]
     public class NodeEdgesGraphic : MaskableGraphic
     {
-        public List<Edge> edges { get; set; }
-        public Dictionary<int, Node> Nodes { get; set; }
+        [SerializeField] private NodeFactory factory;
+        [SerializeField] private float lineWidth = 1f;
         
-        public float lineWidth = 1f;
+        private List<Edge> _edges;
+        [SerializeField] [ReadOnly] private  bool _isInit;
 
+        
+        protected override void Start()
+        {
+            base.Start();
+            _edges = factory.Edges;
+            _isInit = true;
+        }
+        
         private void Update()
         {
             // Перестроить меш каждый кадр, чтобы линии следовали за узлами
+            if (!_isInit) return;
             SetVerticesDirty();
         }
         
@@ -23,7 +34,7 @@ namespace UI.DevicePage
         {
             vh.Clear();
 
-            foreach (var edge in edges)
+            foreach (var edge in _edges)
             {
                 var aNode = edge.a;
                 var bNode = edge.b;

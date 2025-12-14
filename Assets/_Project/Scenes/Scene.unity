@@ -604,8 +604,11 @@ GameObject:
   m_Component:
   - component: {fileID: 737332996}
   - component: {fileID: 737332997}
+  - component: {fileID: 737332998}
+  - component: {fileID: 737333000}
+  - component: {fileID: 737332999}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Graph
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -639,33 +642,69 @@ MonoBehaviour:
   m_GameObject: {fileID: 737332995}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7713bf2ea539498996865a65cf18c7c2, type: 3}
+  m_Script: {fileID: 11500000, guid: d842b637000c4123b912c4bc2898cabc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
+  model:
+    devices: []
+    connections: []
+  prefab: {fileID: 4359858272724202471, guid: f28b9ed75d5c27540acc22650765c648, type: 3}
   container: {fileID: 737332996}
-  testNodeRadius: 10
-  testNodeColor: {r: 0.89411765, g: 0.10818823, b: 0.37016484, a: 1}
-  testNodeSize: {x: 100, y: 100}
-  createTestNodesOnAwake: 1
-  repulsion: 0.01
-  link: 5
-  gravity: 0.01
-  linkDistance: 50
-  extraRepulsionFactor: 15
-  deltaTimeMultiplier: 1
-  stabilizationThreshold: 1
-  stabilizationTime: 10
-  blopPower: 250
-  blopRadius: 150
-  mode: 2
-  currentState: 0
-  lastGravity: 0
-  lastRepulsion: 0
-  lastLink: 0
-  lastExtraRepulsionFactor: 0
-  globalDamping: 0
-  simulationElapsedTime: 0
+  creationGap: 0.1
+--- !u!114 &737332998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737332995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39fd1244eed4a1682d3c6298df27dd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  factory: {fileID: 737332997}
+  edges: []
+  nodes: []
+  linkDistance: 100
+  springPower: 4
+  gravityPower: 0.04
+  repulsionPower: 100000
+  maxVelocity: 300
+  damping: 1
+  overlapRepulsion: 35
+--- !u!114 &737332999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737332995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bd118ba09b74191bbf2345612a861e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  factory: {fileID: 737332997}
+  lineWidth: 1
+  _isInit: 1
+--- !u!222 &737333000
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737332995}
+  m_CullTransparentMesh: 1
 --- !u!1 &830225399
 GameObject:
   m_ObjectHideFlags: 0
@@ -985,6 +1024,10 @@ PrefabInstance:
       propertyPath: m_Group
       value: 
       objectReference: {fileID: 489310425}
+    - target: {fileID: 770557524317703836, guid: d78a1ebb76a32cc4ebe6428cb662df2c, type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5608606930153730581, guid: d78a1ebb76a32cc4ebe6428cb662df2c, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
