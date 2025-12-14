@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c5ca2d513844dcfb185554c063c3a90, type: 3}
   m_Name: Page Routing Settings
   m_EditorClassIdentifier: 
-  initialPagePath: DeviceRoles
+  initialPagePath: Devices/Graph

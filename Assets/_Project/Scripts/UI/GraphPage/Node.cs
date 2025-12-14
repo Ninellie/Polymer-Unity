@@ -18,13 +18,10 @@ namespace UI.DevicePage
         
         public bool isDragged;
 
-        // public DeviceRolesGraph Graph { get; set; }
         public RectTransform RectTransform => drawer.rectTransform;
-
         
         public void OnDrag(PointerEventData eventData)
         {
-            // Graph.RestartSimulation();
             transform.position = eventData.position;
         }
 

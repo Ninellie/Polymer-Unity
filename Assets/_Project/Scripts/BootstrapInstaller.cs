@@ -42,8 +42,7 @@ namespace Polymer
 
         private static RouteBuilder AddDeviceRolesPages(RouteBuilder routeBuilder)
         {
-            routeBuilder.Add("DeviceRoles", "Pages/DeviceRoles/List");
-            routeBuilder.Add("DeviceRoles/Create/{id}", "Pages/DeviceRoles/Create");
+            routeBuilder.Add("Devices/Graph", "Pages/Devices/Graph");
             
             return routeBuilder;
         }

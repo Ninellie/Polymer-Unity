@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Polymer.UI.Routing;
 using TriInspector;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace UI.DevicePage
     /// <summary>
     /// Applies physics forces to nodes
     /// </summary>
-    public class ForceDirectedLayout : MonoBehaviour
+    public class ForceDirectedLayout : PageBase
     {
         [SerializeField] private NodeFactory factory;
         
@@ -47,6 +48,7 @@ namespace UI.DevicePage
             ApplyForces();
             IntegrateForces(Time.deltaTime);
             ClampVelocity();
+            MoveNodes(Time.deltaTime);
             ApplyExtraRepulsion();
         }
 
@@ -64,7 +66,13 @@ namespace UI.DevicePage
             {
                 node.velocity += node.force * dt;
                 node.velocity *= damping;
+            }
+        }
 
+        private void MoveNodes(float dt)
+        {
+            foreach (var node in nodes)
+            {
                 if (node.isDragged) continue;
                 node.RectTransform.anchoredPosition += node.velocity * dt;
             }
@@ -164,6 +172,10 @@ namespace UI.DevicePage
 
                 node.RectTransform.anchoredPosition += displacement;
             }
+        }
+
+        public override void OnPageInit(PageArgs args)
+        {
         }
     }
 }
