@@ -9,6 +9,7 @@ namespace UI.DevicePage
     public class Node : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public int id;
+        public float weight;
         
         public CircleDrawer drawer;
         public TextMeshProUGUI label;

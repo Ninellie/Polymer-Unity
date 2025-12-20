@@ -10,6 +10,7 @@ namespace UI.DevicePage
         [SerializeField] private NetworkModel model;
         [SerializeField] private Node prefab;
         [SerializeField] private RectTransform container;
+        [SerializeField] private float nodeWeighPerEdge;
         [SerializeField] private float creationGap;
         
         public List<Node> Nodes { get; } = new();
@@ -35,6 +36,7 @@ namespace UI.DevicePage
                 node.label.text = device.name;
                 node.force = Vector2.zero;
                 node.velocity = Vector2.zero;
+                node.weight = 1;
                 
                 if (ColorUtility.TryParseHtmlString(device.color, out var color))
                 {
@@ -50,6 +52,7 @@ namespace UI.DevicePage
                 var edge = new Edge();
                 edge.a = Nodes.Find(x => x.id == connection.a);
                 edge.b = Nodes.Find(x => x.id == connection.b);
+                edge.a.weight += nodeWeighPerEdge;
                 Edges.Add(edge);
             }
         }
