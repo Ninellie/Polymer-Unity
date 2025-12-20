@@ -39,10 +39,12 @@ namespace UI.DevicePage
                 var aNode = edge.a;
                 var bNode = edge.b;
 
+                var alpha = Mathf.Min(edge.a.drawer.color.a, edge.b.drawer.color.a);
+                
                 if (aNode == null || bNode == null) continue;
 
                 DrawUILine(vh, aNode.RectTransform.anchoredPosition,
-                    bNode.RectTransform.anchoredPosition, lineWidth, color);
+                    bNode.RectTransform.anchoredPosition, lineWidth, new Color(color.r, color.g, color.b, alpha));
             }
         }
 

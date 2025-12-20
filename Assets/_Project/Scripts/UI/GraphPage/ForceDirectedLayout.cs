@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using Polymer.UI.Routing;
 using TriInspector;
 using UnityEngine;
@@ -29,61 +30,70 @@ namespace UI.DevicePage
         
         [Header("Velocity parameters")]
         [SerializeField] private float maxVelocity;
-        [SerializeField] [ReadOnly] private float damping = 0.99f;
-
+        
+        [Header("Damping parameters")]
+        [SerializeField] [ReadOnly] private float damping;
+        [SerializeField] private float baseDamping;
+        [SerializeField] private float dampingDecreasePerSecond = 3f;
+        
         [SerializeField] private float overlapRepulsion;
 
+        [SerializeField] [ReadOnly] private bool _isSimulated;
+        
+        [SerializeField] [ReadOnly] private Node _selected;
+        
+        private bool _isHighlightingAllowed;
+        
+        public void StartSimulation()
+        {
+            damping = baseDamping;
+            _isSimulated = true;
+        }
+        
         private void Start()
         {
             nodes = factory.Nodes;
             edges = factory.Edges;
+            StartSimulation();
+            _isHighlightingAllowed = true;
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
-            var isDragged = nodes.Any(x => x.isDragged);
-
-            damping = isDragged ? 1f : 0.99f;
+            if (_isSimulated)
+            {
+                ApplyForces();
+                TranslateNodes(Time.deltaTime);
+                
+                damping -= dampingDecreasePerSecond * Time.deltaTime;
+                
+                if (damping < 0)
+                {
+                    _isSimulated = false;
+                }
+            }
             
-            ApplyForces();
-            IntegrateForces(Time.deltaTime);
-            ClampVelocity();
-            MoveNodes(Time.deltaTime);
             ApplyExtraRepulsion();
         }
-
-        private void ClampVelocity()
-        {
-            foreach (var node in nodes)
-            {
-                node.velocity = Vector2.ClampMagnitude(node.velocity, maxVelocity);
-            }
-        }
-
-        private void IntegrateForces(float dt)
-        {
-            foreach (var node in nodes)
-            {
-                node.velocity += node.force * dt;
-                node.velocity *= damping;
-            }
-        }
-
-        private void MoveNodes(float dt)
+        
+        private void TranslateNodes(float dt)
         {
             foreach (var node in nodes)
             {
                 if (node.isDragged) continue;
-                node.RectTransform.anchoredPosition += node.velocity * dt;
+                node.velocity = node.force * dt;
+                node.velocity *= damping;
+                node.velocity = Vector2.ClampMagnitude(node.velocity, maxVelocity);
+                node.RectTransform.anchoredPosition += node.velocity;
             }
         }
         
         private void ApplyForces()
         {
             ClearForces();
-            ApplySpringForces();
-            ApplyGravity();
-            ApplyRepulsion();
+            if (springPower > 0) ApplySpringForces();
+            if (gravityPower > 0) ApplyGravity();
+            if (repulsionPower > 0) ApplyRepulsion();
         }
 
         private void ClearForces()
@@ -105,7 +115,7 @@ namespace UI.DevicePage
 
                     var delta = a.RectTransform.anchoredPosition - b.RectTransform.anchoredPosition;
                     var distance = delta.magnitude + 0.0001f;
-                    var force = delta.normalized * (repulsionPower / (distance * distance));
+                    var force = delta / distance * repulsionPower;
 
                     a.force += force;
                     b.force -= force;
@@ -122,10 +132,21 @@ namespace UI.DevicePage
                 if (distance < 0.0001f) continue;
 
                 var displacement = distance - linkDistance;
-                var force = delta.normalized * (displacement * springPower);
+                var transition = delta.normalized * (displacement * springPower);
+                var totalWeight = edge.a.weight + edge.b.weight;
+                
+                var aTransition = transition * (edge.b.weight / totalWeight);
+                var bTransition = transition * (edge.a.weight / totalWeight);
+                
+                if (!edge.a.isDragged)
+                {
+                    edge.a.force += aTransition;
+                }
 
-                edge.a.force += force;
-                edge.b.force -= force;
+                if (!edge.b.isDragged)
+                {
+                    edge.b.force -= bTransition;   
+                }
             }
         }
 
@@ -176,6 +197,67 @@ namespace UI.DevicePage
 
         public override void OnPageInit(PageArgs args)
         {
+        }
+
+        public void HoverNode(Node node)
+        {
+            if (!_isHighlightingAllowed) return;
+            var selectedNodes = new List<Node>(node.linkedNodes) { node };
+            var nonSelectedNodes = nodes.Except(selectedNodes);
+            foreach (var nonSelectedNode in nonSelectedNodes)
+            {
+                nonSelectedNode.Fade();
+            }
+        }
+
+        public void UnhoverNode(Node node)
+        {
+            if (!_isHighlightingAllowed) return;
+            var selectedNodes = new List<Node>(node.linkedNodes) { node };
+            var nonSelectedNodes = nodes.Except(selectedNodes);
+            foreach (var nonSelectedNode in nonSelectedNodes)
+            {
+                nonSelectedNode.UndoFade();
+            }
+        }
+        
+        public void SetSelectedNode(Node node)
+        {
+            if (_selected == null)
+            {
+                _selected = node;
+            }
+            else
+            {
+                // add edge
+                if (node.linkedNodes.Contains(_selected))
+                {
+                    node.linkedNodes.Remove(_selected);
+                    _selected.linkedNodes.Remove(node);
+
+                    var edge = edges.Find(x => 
+                        x.a == node && x.b == _selected ||
+                        x.b == node && x.a == _selected);
+
+                    edges.Remove(edge);
+
+                    _selected = null;
+                    return;
+                }
+                CreateEdge(_selected, node);
+                _selected = null;
+                StartSimulation();
+            }
+        }
+        
+        private void CreateEdge(Node a, Node b)
+        {
+            var edge = new Edge();
+            edge.a = a;
+            edge.b = b;
+            edges.Add(edge);
+            a.linkedNodes.Add(b);
+            b.linkedNodes.Add(a);
         }
     }
 }

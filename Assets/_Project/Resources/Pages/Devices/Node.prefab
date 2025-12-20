@@ -201,6 +201,8 @@ MonoBehaviour:
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   segments: 64
   lineWidth: 15
+  fadeAlpha: 0.1
+  fadeDuration: 1
 --- !u!114 &4359858272724202471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,8 +216,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
+  weight: 0
+  layout: {fileID: 0}
   drawer: {fileID: 5824433174954210905}
   label: {fileID: 4770508872543784875}
   velocity: {x: 0, y: 0}
   force: {x: 0, y: 0}
   isDragged: 0
+  linkedNodes: []

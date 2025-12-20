@@ -1,3 +1,5 @@
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +11,8 @@ namespace UI.DevicePage
     {
         [SerializeField] private int segments = 64;
         [SerializeField] private float lineWidth = 2f;
+        
+        private TweenerCore<Color, Color, ColorOptions> _tween;
         
         public float Radius
         {
@@ -46,7 +50,8 @@ namespace UI.DevicePage
                 var sin = Mathf.Sin(angle);
                 
                 var outer = center + new Vector2(cos, sin) * Radius;
-                var inner = center + new Vector2(cos, sin) * (Radius - lineWidth);
+                var inner = center + new Vector2(cos, sin) * 0f; 
+                    // (Radius - lineWidth);
             
                 var vOuter = UIVertex.simpleVert;
                 vOuter.color = color;

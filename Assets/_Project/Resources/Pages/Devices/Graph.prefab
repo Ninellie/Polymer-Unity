@@ -52,12 +52,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
+  layout: {fileID: 2329843997727704188}
   model:
     devices: []
     connections: []
   prefab: {fileID: 4359858272724202471, guid: f28b9ed75d5c27540acc22650765c648, type: 3}
   container: {fileID: 6771356685698472314}
-  creationGap: 0.1
+  nodeWeighPerEdge: 100
+  nodeRadiusPerEdge: 0.5
+  creationGap: 0.05
 --- !u!114 &2329843997727704188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,13 +76,16 @@ MonoBehaviour:
   factory: {fileID: 8702187591903853132}
   edges: []
   nodes: []
-  linkDistance: 100
-  springPower: 4
-  gravityPower: 0.04
-  repulsionPower: 100000
-  maxVelocity: 300
+  linkDistance: 200
+  springPower: 5
+  gravityPower: 0.45
+  repulsionPower: 3
+  maxVelocity: 1000
   damping: 1
-  overlapRepulsion: 35
+  baseDamping: 1
+  dampingDecreasePerSecond: 0.1
+  overlapRepulsion: 40
+  _isSimulated: 0
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -101,7 +107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.8509804, b: 0, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

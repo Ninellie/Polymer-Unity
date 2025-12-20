@@ -7,11 +7,13 @@ namespace UI.DevicePage
     public class NodeFactory : MonoBehaviour
     {
         [SerializeField] private TextAsset jsonFile;
+        [SerializeField] private ForceDirectedLayout layout;
         [SerializeField] private NetworkModel model;
         [SerializeField] private Node prefab;
         [SerializeField] private RectTransform container;
-        [SerializeField] private float nodeWeighPerEdge;
-        [SerializeField] private float creationGap;
+        [SerializeField] private float nodeWeighPerEdge = 100;
+        [SerializeField] private float nodeRadiusPerEdge = 1;
+        [SerializeField] private float creationGap = 0.1f;
         
         public List<Node> Nodes { get; } = new();
         public List<Edge> Edges { get; } = new();
@@ -31,6 +33,8 @@ namespace UI.DevicePage
             {
                 yield return new WaitForSeconds(creationGap);
                 var node = Instantiate(prefab, container);
+                node.name = device.name;
+                node.layout = layout;
                 node.RectTransform.anchoredPosition += Random.insideUnitCircle.normalized * Random.Range(100, 500);
                 node.id = device.id;
                 node.label.text = device.name;
@@ -44,6 +48,7 @@ namespace UI.DevicePage
                 }
                 
                 Nodes.Add(node);
+                layout.StartSimulation();
             }
             
             foreach (var connection in model.connections)
@@ -52,8 +57,18 @@ namespace UI.DevicePage
                 var edge = new Edge();
                 edge.a = Nodes.Find(x => x.id == connection.a);
                 edge.b = Nodes.Find(x => x.id == connection.b);
+                
                 edge.a.weight += nodeWeighPerEdge;
+                edge.b.weight += nodeWeighPerEdge;
+                
+                edge.a.linkedNodes.Add(edge.b);
+                edge.b.linkedNodes.Add(edge.a);
+                
+                edge.a.RectTransform.sizeDelta += Vector2.one * nodeRadiusPerEdge;
+                edge.b.RectTransform.sizeDelta += Vector2.one * nodeRadiusPerEdge;
+                
                 Edges.Add(edge);
+                layout.StartSimulation();
             }
         }
     }
