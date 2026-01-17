@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8702187591903853132}
   - component: {fileID: 2329843997727704188}
   - component: {fileID: 4733686572712153979}
-  - component: {fileID: 2193919612796532949}
   m_Layer: 5
   m_Name: Graph
   m_TagString: Untagged
@@ -56,10 +55,9 @@ MonoBehaviour:
   model:
     devices: []
     connections: []
-  prefab: {fileID: 4359858272724202471, guid: f28b9ed75d5c27540acc22650765c648, type: 3}
   container: {fileID: 6771356685698472314}
-  nodeWeighPerEdge: 100
-  nodeRadiusPerEdge: 0.5
+  nodeWeighPerEdge: 1
+  nodeRadiusPerEdge: 0.1
   creationGap: 0.05
 --- !u!114 &2329843997727704188
 MonoBehaviour:
@@ -74,8 +72,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   factory: {fileID: 8702187591903853132}
-  edges: []
-  nodes: []
   linkDistance: 75
   springPower: 2
   gravityPower: 0.8
@@ -83,10 +79,9 @@ MonoBehaviour:
   maxVelocity: 600
   damping: 1
   baseDamping: 1
-  dampingDecreasePerSecond: 0.1
+  dampingDecreasePerSecond: 0
   overlapRepulsion: 40
   _isSimulated: 0
-  _selected: {fileID: 0}
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -95,26 +90,3 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918683683182912811}
   m_CullTransparentMesh: 1
---- !u!114 &2193919612796532949
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 918683683182912811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bd118ba09b74191bbf2345612a861e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 1, g: 0.8509804, b: 0, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  factory: {fileID: 8702187591903853132}
-  lineWidth: 1
-  _isInit: 1

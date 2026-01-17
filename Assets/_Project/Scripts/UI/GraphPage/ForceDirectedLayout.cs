@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Polymer.UI.Routing;
 using TriInspector;
 using UnityEngine;
@@ -12,11 +10,7 @@ namespace UI.DevicePage
     public class ForceDirectedLayout : PageBase
     {
         [SerializeField] private NodeFactory factory;
-        
-        [Header("Nodes")]
-        [SerializeField] private List<Edge> edges;
-        [SerializeField] private List<Node> nodes;
-        
+
         [Header("Spring parameters")]
         [SerializeField] private float linkDistance;
         [SerializeField] private float springPower;
@@ -39,14 +33,15 @@ namespace UI.DevicePage
 
         [SerializeField] [ReadOnly] private bool _isSimulated;
         
-        [SerializeField] [ReadOnly] private Node _selected;
+        // [SerializeField] [ReadOnly] private NodeComponent _selected;
+
+        [SerializeField] private Graph graph;
         
         private bool _isHighlightingAllowed;
         
         private void Start()
         {
-            nodes = factory.Nodes;
-            edges = factory.Edges;
+            graph = Graph.Instance;
             StartSimulation();
             _isHighlightingAllowed = true;
         }
@@ -57,62 +52,14 @@ namespace UI.DevicePage
             _isSimulated = true;
         }
         
-        public void HoverNode(Node node)
-        {
-            if (!_isHighlightingAllowed) return;
-            var selectedNodes = new List<Node>(node.linkedNodes) { node };
-            var nonSelectedNodes = nodes.Except(selectedNodes);
-            foreach (var nonSelectedNode in nonSelectedNodes)
-            {
-                nonSelectedNode.Fade();
-            }
-        }
-
-        public void UnhoverNode(Node node)
-        {
-            if (!_isHighlightingAllowed) return;
-            var selectedNodes = new List<Node>(node.linkedNodes) { node };
-            var nonSelectedNodes = nodes.Except(selectedNodes);
-            foreach (var nonSelectedNode in nonSelectedNodes)
-            {
-                nonSelectedNode.UndoFade();
-            }
-        }
-        
-        public void SetSelectedNode(Node node)
-        {
-            if (_selected == null)
-            {
-                _selected = node;
-            }
-            else
-            {
-                // add edge
-                if (node.linkedNodes.Contains(_selected))
-                {
-                    node.linkedNodes.Remove(_selected);
-                    _selected.linkedNodes.Remove(node);
-
-                    var edge = edges.Find(x => 
-                        x.a == node && x.b == _selected ||
-                        x.b == node && x.a == _selected);
-
-                    edges.Remove(edge);
-
-                    _selected = null;
-                    return;
-                }
-                CreateEdge(_selected, node);
-                _selected = null;
-                StartSimulation();
-            }
-        }
         
         private void Update()
         {
             if (_isSimulated)
             {
                 ApplyForces();
+                
+                TranslateNodes(Time.deltaTime);
                 
                 damping -= dampingDecreasePerSecond * Time.deltaTime;
                 
@@ -122,27 +69,18 @@ namespace UI.DevicePage
                 }
             }
             
-            var extraDisplacements = CalculateExtraRepulsion();
-            TranslateNodes(Time.deltaTime, extraDisplacements);
+            ApplyExtraRepulsion();
         }
         
-        private void TranslateNodes(float dt, Dictionary<Node, Vector2> extraDisplacements)
+        private void TranslateNodes(float dt)
         {
-            foreach (var node in nodes)
+            foreach (var node in graph.Nodes)
             {
-                if (node.isDragged) continue;
-                
-                node.velocity = node.force * dt;
-                node.velocity *= damping;
-                node.velocity = Vector2.ClampMagnitude(node.velocity, maxVelocity);
-                
-                var totalDisplacement = node.velocity;
-                if (extraDisplacements != null && extraDisplacements.TryGetValue(node, out var extraDisplacement))
-                {
-                    totalDisplacement += extraDisplacement;
-                }
-                
-                node.RectTransform.anchoredPosition += totalDisplacement;
+                if (node.IsDragged) continue;
+                node.Velocity = node.Force * dt;
+                node.Velocity *= damping;
+                node.Velocity = Vector2.ClampMagnitude(node.Velocity, maxVelocity);
+                node.Position += node.Velocity;
             }
         }
         
@@ -156,14 +94,16 @@ namespace UI.DevicePage
 
         private void ClearForces()
         {
-            foreach (var node in nodes)
+            foreach (var node in graph.Nodes)
             {
-                node.force = Vector2.zero;
+                node.Force = Vector2.zero;
             }
         }
 
         private void ApplyRepulsion()
         {
+            var nodes = graph.Nodes;
+            
             for (var i = 0; i < nodes.Count; i++)
             {
                 for (var j = i + 1; j < nodes.Count; j++)
@@ -171,69 +111,67 @@ namespace UI.DevicePage
                     var a = nodes[i];
                     var b = nodes[j];
 
-                    var delta = a.RectTransform.anchoredPosition - b.RectTransform.anchoredPosition;
+                    var delta = a.Position - b.Position;
                     var distance = delta.magnitude + 0.0001f;
                     var force = delta / distance * repulsionPower;
 
-                    a.force += force;
-                    b.force -= force;
+                    a.Force += force;
+                    b.Force -= force;
                 }
             }
         }
         
         private void ApplySpringForces()
         {
-            foreach (var edge in edges)
+            foreach (var connection in graph.Connections)
             {
-                var delta = edge.b.RectTransform.anchoredPosition - edge.a.RectTransform.anchoredPosition;
+                var delta = connection.b.Position - connection.a.Position;
                 var distance = delta.magnitude;
                 if (distance < 0.0001f) continue;
 
                 var displacement = distance - linkDistance;
                 var transition = delta.normalized * (displacement * springPower);
-                var totalWeight = edge.a.weight + edge.b.weight;
+                var totalWeight = connection.a.Weight + connection.b.Weight;
                 
-                var aTransition = transition * (edge.b.weight / totalWeight);
-                var bTransition = transition * (edge.a.weight / totalWeight);
+                var aTransition = transition * (connection.b.Weight / totalWeight);
+                var bTransition = transition * (connection.a.Weight / totalWeight);
                 
-                if (!edge.a.isDragged)
+                if (!connection.a.IsDragged)
                 {
-                    edge.a.force += aTransition;
+                    connection.a.Force += aTransition;
                 }
 
-                if (!edge.b.isDragged)
+                if (!connection.b.IsDragged)
                 {
-                    edge.b.force -= bTransition;   
+                    connection.b.Force -= bTransition;   
                 }
             }
         }
 
         private void ApplyGravity()
         {
-            foreach (var node in nodes)
+            foreach (var node in graph.Nodes)
             {
-                var delta = Vector2.zero - node.RectTransform.anchoredPosition;
-                node.force += delta * gravityPower;
+                var delta = Vector2.zero - node.Position;
+                node.Force += delta * gravityPower;
             }
         }
-        
-        private Dictionary<Node, Vector2> CalculateExtraRepulsion()
+
+        private void ApplyExtraRepulsion()
         {
-            var displacements = new Dictionary<Node, Vector2>();
-            
-            foreach (var node in nodes)
+            foreach (var node in graph.Nodes)
             {
-                if (node.isDragged) continue;
+                if (node.IsDragged) continue;
                 var displacement = Vector2.zero;
-                var posA = node.RectTransform.anchoredPosition;
-                var dominantRange = node.drawer.Radius + overlapRepulsion;
+                var posA = node.Position;
+                var dominantRange = node.Radius + overlapRepulsion;
                 var dominantRangeSqr = dominantRange * dominantRange;
 
-                foreach (var other in nodes)
+                foreach (var other in graph.Nodes)
                 {
-                    if (other.id == node.id) continue;
+                    if (other.Id == node.Id) continue;
 
-                    var posB = other.RectTransform.anchoredPosition;
+                    var posB = other.Position;
                     var direction = posA - posB;
                     var distanceSqr = direction.sqrMagnitude;
 
@@ -251,27 +189,64 @@ namespace UI.DevicePage
                     displacement += direction / distance * pushForce;
                 }
 
-                if (displacement.sqrMagnitude > 0.0001f)
-                {
-                    displacements[node] = displacement;
-                }
+                node.Position += displacement;
             }
-            
-            return displacements;
         }
-
+        
         public override void OnPageInit(PageArgs args)
         {
         }
         
-        private void CreateEdge(Node a, Node b)
-        {
-            var edge = new Edge();
-            edge.a = a;
-            edge.b = b;
-            edges.Add(edge);
-            a.linkedNodes.Add(b);
-            b.linkedNodes.Add(a);
-        }
+        //
+        // public void HoverNode(NodeComponent nodeComponent)
+        // {
+        //     if (!_isHighlightingAllowed) return;
+        //     var selectedNodes = new List<NodeComponent>(nodeComponent.linkedNodes) { nodeComponent };
+        //     var nonSelectedNodes = nodes.Except(selectedNodes);
+        //     foreach (var nonSelectedNode in nonSelectedNodes)
+        //     {
+        //         nonSelectedNode.Fade();
+        //     }
+        // }
+        //
+        // public void UnhoverNode(NodeComponent nodeComponent)
+        // {
+        //     if (!_isHighlightingAllowed) return;
+        //     var selectedNodes = new List<NodeComponent>(nodeComponent.linkedNodes) { nodeComponent };
+        //     var nonSelectedNodes = nodes.Except(selectedNodes);
+        //     foreach (var nonSelectedNode in nonSelectedNodes)
+        //     {
+        //         nonSelectedNode.UndoFade();
+        //     }
+        // }
+        //
+        // public void SetSelectedNode(NodeComponent nodeComponent)
+        // {
+        //     if (_selected == null)
+        //     {
+        //         _selected = nodeComponent;
+        //     }
+        //     else
+        //     {
+        //         // add edge
+        //         if (nodeComponent.linkedNodes.Contains(_selected))
+        //         {
+        //             nodeComponent.linkedNodes.Remove(_selected);
+        //             _selected.linkedNodes.Remove(nodeComponent);
+        //
+        //             var edge = edges.Find(x => 
+        //                 x.a == nodeComponent && x.b == _selected ||
+        //                 x.b == nodeComponent && x.a == _selected);
+        //
+        //             edges.Remove(edge);
+        //
+        //             _selected = null;
+        //             return;
+        //         }
+        //         CreateEdge(_selected, nodeComponent);
+        //         _selected = null;
+        //         StartSimulation();
+        //     }
+        // }
     }
 }

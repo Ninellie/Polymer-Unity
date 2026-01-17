@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Core.Services;
 using UnityEngine;
 
 namespace UI.DevicePage
@@ -11,21 +9,13 @@ namespace UI.DevicePage
         [SerializeField] private TextAsset jsonFile;
         [SerializeField] private ForceDirectedLayout layout;
         [SerializeField] private NetworkModel model;
-        [SerializeField] private Node prefab;
         [SerializeField] private RectTransform container;
         [SerializeField] private float nodeWeighPerEdge = 100;
         [SerializeField] private float nodeRadiusPerEdge = 1;
         [SerializeField] private float creationGap = 0.1f;
-        
-        public List<Node> Nodes { get; } = new();
-        public List<Edge> Edges { get; } = new();
-        
+
         private void Awake()
         {
-            // if (jsonFile == null) return;
-            // model = JsonUtility.FromJson<NetworkModel>(jsonFile.text);
-            // Debug.Log($"JSON: devices count: {model.devices.Count}. Connections count: {model.connections.Count}");
-
             StartCoroutine(CreateNodes());
         }
             
@@ -37,46 +27,45 @@ namespace UI.DevicePage
             yield return new WaitUntil(() => task.Status == TaskStatus.RanToCompletion);
             model = task.Result;
             Debug.Log($"GetDevices task is complete. Device count: {model.devices.Count}. Connections: {model.connections.Count}");
+
+            var nodes = Graph.Instance.Nodes;
             
             foreach (var device in model.devices)
             {
                 yield return new WaitForSeconds(creationGap);
-                var node = Instantiate(prefab, container);
-                node.name = device.name;
-                node.layout = layout;
-                node.RectTransform.anchoredPosition += Random.insideUnitCircle.normalized * Random.Range(100, 500);
-                node.id = device.id;
-                node.label.text = device.name;
-                node.force = Vector2.zero;
-                node.velocity = Vector2.zero;
-                node.weight = 1;
+                var node = new Node();
+                node.Device = device;
+                node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
+                node.Id = device.id;
+                node.Weight = 1;
+                node.Radius = 15;
                 
                 if (ColorUtility.TryParseHtmlString(device.color, out var color))
                 {
-                    node.drawer.color = color;
+                    node.Color = color;
                 }
                 
-                Nodes.Add(node);
+                Graph.Instance.Nodes.Add(node);
                 layout.StartSimulation();
             }
             
             foreach (var connection in model.connections)
             { 
                 yield return new WaitForSeconds(creationGap);
-                var edge = new Edge();
-                edge.a = Nodes.Find(x => x.id == connection.a);
-                edge.b = Nodes.Find(x => x.id == connection.b);
+                var a = nodes[connection.a];
+                var b = nodes[connection.b];
                 
-                edge.a.weight += nodeWeighPerEdge;
-                edge.b.weight += nodeWeighPerEdge;
+                a.Weight += nodeWeighPerEdge;
+                b.Weight += nodeWeighPerEdge;
                 
-                edge.a.linkedNodes.Add(edge.b);
-                edge.b.linkedNodes.Add(edge.a);
+                a.ConnectedNodes.Add(b);
+                b.ConnectedNodes.Add(a);
                 
-                edge.a.RectTransform.sizeDelta += Vector2.one * nodeRadiusPerEdge;
-                edge.b.RectTransform.sizeDelta += Vector2.one * nodeRadiusPerEdge;
+                a.Radius += nodeRadiusPerEdge;
+                b.Radius += nodeRadiusPerEdge;
+
+                Graph.Instance.Connections.Add((a, b));
                 
-                Edges.Add(edge);
                 layout.StartSimulation();
             }
         }
