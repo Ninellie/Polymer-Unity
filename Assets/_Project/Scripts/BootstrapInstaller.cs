@@ -16,11 +16,6 @@ namespace Polymer
         protected override void Configure(IContainerBuilder builder)
         {
             // Data access object
-            builder.Register<ApplicationDataProvider>(Lifetime.Singleton);
-            builder.Register<DeviceRoleDataService>(Lifetime.Singleton);
-            builder.RegisterEntryPoint<JsonDataService>().AsSelf();
-            builder.RegisterEntryPoint<DataInitializationService>();
-            builder.RegisterEntryPoint<DataTestService>();
             
             var routeTable = CreateRouteTable();
             builder.RegisterInstance(routeTable);

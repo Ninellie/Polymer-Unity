@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Core.Services;
 using UnityEngine;
 
 namespace UI.DevicePage
@@ -20,15 +22,22 @@ namespace UI.DevicePage
         
         private void Awake()
         {
-            if (jsonFile == null) return;
-            model = JsonUtility.FromJson<NetworkModel>(jsonFile.text);
-            Debug.Log($"JSON: devices count: {model.devices.Count}. Connections count: {model.connections.Count}");
+            // if (jsonFile == null) return;
+            // model = JsonUtility.FromJson<NetworkModel>(jsonFile.text);
+            // Debug.Log($"JSON: devices count: {model.devices.Count}. Connections count: {model.connections.Count}");
 
             StartCoroutine(CreateNodes());
         }
             
         private IEnumerator CreateNodes()
         {
+            Debug.Log("Node creating started");
+            Debug.Log("Getting devices");
+            var task = NetBoxDataProvider.GetNetworkModel();
+            yield return new WaitUntil(() => task.Status == TaskStatus.RanToCompletion);
+            model = task.Result;
+            Debug.Log($"GetDevices task is complete. Device count: {model.devices.Count}. Connections: {model.connections.Count}");
+            
             foreach (var device in model.devices)
             {
                 yield return new WaitForSeconds(creationGap);
@@ -44,7 +53,7 @@ namespace UI.DevicePage
                 
                 if (ColorUtility.TryParseHtmlString(device.color, out var color))
                 {
-                    node.drawer.color *= color;
+                    node.drawer.color = color;
                 }
                 
                 Nodes.Add(node);

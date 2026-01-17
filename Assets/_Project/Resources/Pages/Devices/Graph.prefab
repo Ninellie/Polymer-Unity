@@ -76,16 +76,17 @@ MonoBehaviour:
   factory: {fileID: 8702187591903853132}
   edges: []
   nodes: []
-  linkDistance: 200
-  springPower: 5
-  gravityPower: 0.45
+  linkDistance: 75
+  springPower: 2
+  gravityPower: 0.8
   repulsionPower: 3
-  maxVelocity: 1000
+  maxVelocity: 600
   damping: 1
   baseDamping: 1
   dampingDecreasePerSecond: 0.1
   overlapRepulsion: 40
   _isSimulated: 0
+  _selected: {fileID: 0}
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0

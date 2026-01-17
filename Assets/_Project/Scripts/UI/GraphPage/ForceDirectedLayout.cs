@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening;
 using Polymer.UI.Routing;
 using TriInspector;
 using UnityEngine;
@@ -44,12 +43,6 @@ namespace UI.DevicePage
         
         private bool _isHighlightingAllowed;
         
-        public void StartSimulation()
-        {
-            damping = baseDamping;
-            _isSimulated = true;
-        }
-        
         private void Start()
         {
             nodes = factory.Nodes;
@@ -58,12 +51,68 @@ namespace UI.DevicePage
             _isHighlightingAllowed = true;
         }
 
+        public void StartSimulation()
+        {
+            damping = baseDamping;
+            _isSimulated = true;
+        }
+        
+        public void HoverNode(Node node)
+        {
+            if (!_isHighlightingAllowed) return;
+            var selectedNodes = new List<Node>(node.linkedNodes) { node };
+            var nonSelectedNodes = nodes.Except(selectedNodes);
+            foreach (var nonSelectedNode in nonSelectedNodes)
+            {
+                nonSelectedNode.Fade();
+            }
+        }
+
+        public void UnhoverNode(Node node)
+        {
+            if (!_isHighlightingAllowed) return;
+            var selectedNodes = new List<Node>(node.linkedNodes) { node };
+            var nonSelectedNodes = nodes.Except(selectedNodes);
+            foreach (var nonSelectedNode in nonSelectedNodes)
+            {
+                nonSelectedNode.UndoFade();
+            }
+        }
+        
+        public void SetSelectedNode(Node node)
+        {
+            if (_selected == null)
+            {
+                _selected = node;
+            }
+            else
+            {
+                // add edge
+                if (node.linkedNodes.Contains(_selected))
+                {
+                    node.linkedNodes.Remove(_selected);
+                    _selected.linkedNodes.Remove(node);
+
+                    var edge = edges.Find(x => 
+                        x.a == node && x.b == _selected ||
+                        x.b == node && x.a == _selected);
+
+                    edges.Remove(edge);
+
+                    _selected = null;
+                    return;
+                }
+                CreateEdge(_selected, node);
+                _selected = null;
+                StartSimulation();
+            }
+        }
+        
         private void Update()
         {
             if (_isSimulated)
             {
                 ApplyForces();
-                TranslateNodes(Time.deltaTime);
                 
                 damping -= dampingDecreasePerSecond * Time.deltaTime;
                 
@@ -73,18 +122,27 @@ namespace UI.DevicePage
                 }
             }
             
-            ApplyExtraRepulsion();
+            var extraDisplacements = CalculateExtraRepulsion();
+            TranslateNodes(Time.deltaTime, extraDisplacements);
         }
         
-        private void TranslateNodes(float dt)
+        private void TranslateNodes(float dt, Dictionary<Node, Vector2> extraDisplacements)
         {
             foreach (var node in nodes)
             {
                 if (node.isDragged) continue;
+                
                 node.velocity = node.force * dt;
                 node.velocity *= damping;
                 node.velocity = Vector2.ClampMagnitude(node.velocity, maxVelocity);
-                node.RectTransform.anchoredPosition += node.velocity;
+                
+                var totalDisplacement = node.velocity;
+                if (extraDisplacements != null && extraDisplacements.TryGetValue(node, out var extraDisplacement))
+                {
+                    totalDisplacement += extraDisplacement;
+                }
+                
+                node.RectTransform.anchoredPosition += totalDisplacement;
             }
         }
         
@@ -159,8 +217,10 @@ namespace UI.DevicePage
             }
         }
         
-        private void ApplyExtraRepulsion()
+        private Dictionary<Node, Vector2> CalculateExtraRepulsion()
         {
+            var displacements = new Dictionary<Node, Vector2>();
+            
             foreach (var node in nodes)
             {
                 if (node.isDragged) continue;
@@ -191,63 +251,17 @@ namespace UI.DevicePage
                     displacement += direction / distance * pushForce;
                 }
 
-                node.RectTransform.anchoredPosition += displacement;
+                if (displacement.sqrMagnitude > 0.0001f)
+                {
+                    displacements[node] = displacement;
+                }
             }
+            
+            return displacements;
         }
 
         public override void OnPageInit(PageArgs args)
         {
-        }
-
-        public void HoverNode(Node node)
-        {
-            if (!_isHighlightingAllowed) return;
-            var selectedNodes = new List<Node>(node.linkedNodes) { node };
-            var nonSelectedNodes = nodes.Except(selectedNodes);
-            foreach (var nonSelectedNode in nonSelectedNodes)
-            {
-                nonSelectedNode.Fade();
-            }
-        }
-
-        public void UnhoverNode(Node node)
-        {
-            if (!_isHighlightingAllowed) return;
-            var selectedNodes = new List<Node>(node.linkedNodes) { node };
-            var nonSelectedNodes = nodes.Except(selectedNodes);
-            foreach (var nonSelectedNode in nonSelectedNodes)
-            {
-                nonSelectedNode.UndoFade();
-            }
-        }
-        
-        public void SetSelectedNode(Node node)
-        {
-            if (_selected == null)
-            {
-                _selected = node;
-            }
-            else
-            {
-                // add edge
-                if (node.linkedNodes.Contains(_selected))
-                {
-                    node.linkedNodes.Remove(_selected);
-                    _selected.linkedNodes.Remove(node);
-
-                    var edge = edges.Find(x => 
-                        x.a == node && x.b == _selected ||
-                        x.b == node && x.a == _selected);
-
-                    edges.Remove(edge);
-
-                    _selected = null;
-                    return;
-                }
-                CreateEdge(_selected, node);
-                _selected = null;
-                StartSimulation();
-            }
         }
         
         private void CreateEdge(Node a, Node b)
