@@ -87,21 +87,37 @@ namespace FDLayout
 
         private void ApplyRepulsion()
         {
-            for (var i = 0; i < Nodes.Count; i++)
+            var bounds = GetBounds();
+
+            var root = new QuadTree(bounds);
+            foreach (var node in Nodes)
+                root.Insert(node);
+
+            foreach (var node in Nodes)
             {
-                for (var j = i + 1; j < Nodes.Count; j++)
-                {
-                    var a = Nodes[i];
-                    var b = Nodes[j];
+                if (node.IsFixed) continue;
 
-                    var delta = a.Position - b.Position;
-                    var distance = delta.magnitude + 0.0001f;
-                    var force = delta / distance * Charge;
-
-                    a.Force += force;
-                    b.Force -= force;
-                }
+                node.Force += root.ComputeRepulsion(node, Theta, Charge);
             }
+        }
+        
+        private Rect GetBounds()
+        {
+            var minX = float.MaxValue;
+            var minY = float.MaxValue;
+            var maxX = float.MinValue;
+            var maxY = float.MinValue;
+
+            foreach (var node in Nodes)
+            {
+                minX = Mathf.Min(minX, node.Position.x);
+                minY = Mathf.Min(minY, node.Position.y);
+                maxX = Mathf.Max(maxX, node.Position.x);
+                maxY = Mathf.Max(maxY, node.Position.y);
+            }
+
+            var size = Mathf.Max(maxX - minX, maxY - minY);
+            return new Rect(minX, minY, size, size);
         }
         
         private void ApplySpringForces()
