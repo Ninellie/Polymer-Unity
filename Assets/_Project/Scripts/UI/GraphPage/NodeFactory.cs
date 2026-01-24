@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Threading.Tasks;
+using FDLayout;
 using UnityEngine;
 
 namespace UI.DevicePage
@@ -34,7 +35,6 @@ namespace UI.DevicePage
             {
                 yield return new WaitForSeconds(creationGap);
                 var node = new Node();
-                node.Device = device;
                 node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
                 node.Id = device.id;
                 node.Weight = 1;
@@ -58,8 +58,8 @@ namespace UI.DevicePage
                 a.Weight += nodeWeighPerEdge;
                 b.Weight += nodeWeighPerEdge;
                 
-                a.ConnectedNodes.Add(b);
-                b.ConnectedNodes.Add(a);
+                a.Links.Add(b);
+                b.Links.Add(a);
                 
                 a.Radius += nodeRadiusPerEdge;
                 b.Radius += nodeRadiusPerEdge;
