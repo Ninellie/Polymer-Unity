@@ -4,14 +4,24 @@ using UnityEngine;
 
 namespace UI.DevicePage
 {
+    public class ForceDirectedLayout1
+    {
+        public void Tick(float dt)
+        {
+            
+        } 
+    }
+    
+    
+    
     /// <summary>
     /// Applies physics forces to nodes
     /// </summary>
-    public class ForceDirectedLayout : PageBase
+    public class ForceDirectedLayoutPage : PageBase
     {
         [SerializeField] private NodeFactory factory;
-
         [Header("Spring parameters")]
+
         [SerializeField] private float linkDistance;
         [SerializeField] private float springPower;
         
@@ -37,13 +47,12 @@ namespace UI.DevicePage
 
         [SerializeField] private Graph graph;
         
-        private bool _isHighlightingAllowed;
+        
         
         private void Start()
         {
             graph = Graph.Instance;
             StartSimulation();
-            _isHighlightingAllowed = true;
         }
 
         public void StartSimulation()
@@ -51,8 +60,7 @@ namespace UI.DevicePage
             damping = baseDamping;
             _isSimulated = true;
         }
-        
-        
+
         private void Update()
         {
             if (_isSimulated)
@@ -71,7 +79,8 @@ namespace UI.DevicePage
             
             ApplyExtraRepulsion();
         }
-        
+
+
         private void TranslateNodes(float dt)
         {
             foreach (var node in graph.Nodes)
@@ -83,7 +92,7 @@ namespace UI.DevicePage
                 node.Position += node.Velocity;
             }
         }
-        
+
         private void ApplyForces()
         {
             ClearForces();

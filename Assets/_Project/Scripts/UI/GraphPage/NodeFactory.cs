@@ -7,7 +7,7 @@ namespace UI.DevicePage
     public class NodeFactory : MonoBehaviour
     {
         [SerializeField] private TextAsset jsonFile;
-        [SerializeField] private ForceDirectedLayout layout;
+        [SerializeField] private ForceDirectedLayoutPage layoutPage;
         [SerializeField] private NetworkModel model;
         [SerializeField] private RectTransform container;
         [SerializeField] private float nodeWeighPerEdge = 100;
@@ -29,7 +29,7 @@ namespace UI.DevicePage
             Debug.Log($"GetDevices task is complete. Device count: {model.devices.Count}. Connections: {model.connections.Count}");
 
             var nodes = Graph.Instance.Nodes;
-            
+            nodes.Clear();
             foreach (var device in model.devices)
             {
                 yield return new WaitForSeconds(creationGap);
@@ -46,7 +46,7 @@ namespace UI.DevicePage
                 }
                 
                 Graph.Instance.Nodes.Add(node);
-                layout.StartSimulation();
+                layoutPage.StartSimulation();
             }
             
             foreach (var connection in model.connections)
@@ -66,7 +66,7 @@ namespace UI.DevicePage
 
                 Graph.Instance.Connections.Add((a, b));
                 
-                layout.StartSimulation();
+                layoutPage.StartSimulation();
             }
         }
     }

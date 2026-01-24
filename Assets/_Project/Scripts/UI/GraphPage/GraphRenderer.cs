@@ -15,6 +15,8 @@ namespace UI.DevicePage
         private Vector2[] _uvs;
         private int _lastNodeCount = 0;
         
+        private Mesh quadMesh;
+        
         private void Start()
         {
             _mesh = new Mesh();
@@ -25,8 +27,7 @@ namespace UI.DevicePage
             
             GetComponent<MeshRenderer>().material = nodeMaterial;
         }
-
-        private void Update()
+        private void LateUpdate()
         {
             var nodes = Graph.Instance.Nodes;
             var nodeCount = nodes.Count;

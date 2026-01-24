@@ -73,7 +73,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   factory: {fileID: 8702187591903853132}
   linkDistance: 75
-  springPower: 2
+  springPower: 0.4
   gravityPower: 0.8
   repulsionPower: 3
   maxVelocity: 600
