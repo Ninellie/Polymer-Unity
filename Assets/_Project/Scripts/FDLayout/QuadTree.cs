@@ -24,8 +24,7 @@ namespace FDLayout
             var delta = node.Position - _centerOfMass;
             var distance = delta.magnitude + 0.001f;
             var size = _bounds.width;
-
-            // Barnes–Hut условие
+            
             if (_children == null || size / distance < theta)
             {
                 return delta / distance * (charge * _mass);

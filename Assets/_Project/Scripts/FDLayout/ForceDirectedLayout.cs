@@ -13,15 +13,16 @@ namespace FDLayout
         public float LinkStrength { get; set; }
         public float Friction { get; set; } // alpha decrease per second
         public float Charge { get; set; }
-        public float ChargeDistance { get; set; }
         public float Theta { get; set; }
         public float Alpha { get; set; }
         
         public float MaxVelocity { get; set; }
         
         public bool IsSimulated { get; set; }
+        public float CellSize { get; set; }
+        public float DominantRange { get; set; }
 
-        private float _dumping;
+        private float _damping;
         
         public ForceDirectedLayout(
             List<Node> nodes = null,
@@ -32,8 +33,10 @@ namespace FDLayout
             float friction = 1,
             float charge = 2,
             float theta = 0.8f,
-            float alpha = 1f,
-            float maxVelocity = 600)
+            float alpha = 1,
+            float maxVelocity = 600,
+            float cellSize = 40,
+            float dominantRange = 40)
         {
             Nodes = nodes;
             Links = links;
@@ -45,16 +48,20 @@ namespace FDLayout
             Theta = theta;
             Alpha = alpha;
             MaxVelocity = maxVelocity;
+            CellSize = cellSize;
+            DominantRange = dominantRange;
         }
 
         public void Start()
         {
-            _dumping = Alpha;
+            _damping = Alpha;
             IsSimulated = true;
         }
         
         public void Tick(float dt)
         {
+            ApplyCollisionRepulsion();
+            
             if (!IsSimulated) return;
             
             ClearForces();
@@ -63,9 +70,9 @@ namespace FDLayout
                 
             TranslateNodes(dt);
                 
-            _dumping -= Friction * dt;
+            _damping -= Friction * dt;
                 
-            if (_dumping > 0) return;
+            if (_damping > 0) return;
             
             IsSimulated = false;
         }
@@ -162,46 +169,66 @@ namespace FDLayout
             {
                 if (node.IsFixed) continue;
                 node.Velocity = node.Force * dt;
-                node.Velocity *= _dumping;
+                node.Velocity *= _damping;
                 node.Velocity = Vector2.ClampMagnitude(node.Velocity, MaxVelocity);
                 node.Position += node.Velocity;
             }
         }
+
+        private void ApplyCollisionRepulsion()
+        {
+            Dictionary<Vector2Int, List<Node>> grid = new();
+
+            foreach (var node in Nodes)
+            {
+                var c = Cell(node.Position);
+                if (!grid.TryGetValue(c, out var list))
+                {
+                    grid[c] = list = new List<Node>();
+                }
+                list.Add(node);
+            }
+            
+            foreach (var node in Nodes)
+            {
+                if (node.IsFixed) continue;
+
+                var displacement = Vector2.zero;
+                var cell = Cell(node.Position);
+
+                for (var dx = -1; dx <= 1; dx++)
+                for (var dy = -1; dy <= 1; dy++)
+                {
+                    var neighborCell = cell + new Vector2Int(dx, dy);
+                    if (!grid.TryGetValue(neighborCell, out var others))
+                        continue;
+
+                    foreach (var other in others)
+                    {
+                        if (other == node) continue;
+
+                        var dir = node.Position - other.Position;
+                        var distSqr = dir.sqrMagnitude;
+                        var dominantRangeSqr = DominantRange * DominantRange;
+                        if (distSqr > dominantRangeSqr) continue;
+                        
+                        var dist = Mathf.Sqrt(distSqr);
+                        if (dist < 0.0001f) continue;
+
+                        displacement += dir / dist * ((DominantRange - dist) * 0.1f);
+                    }
+                }
+
+                node.Position += displacement;
+            }
+        }
         
-        // private void ApplyExtraRepulsion()
-        // {
-        //     foreach (var node in graph.Nodes)
-        //     {
-        //         if (node.IsFixed) continue;
-        //         var displacement = Vector2.zero;
-        //         var posA = node.Position;
-        //         var dominantRange = node.Radius + overlapRepulsion;
-        //         var dominantRangeSqr = dominantRange * dominantRange;
-        //
-        //         foreach (var other in graph.Nodes)
-        //         {
-        //             if (other.Id == node.Id) continue;
-        //
-        //             var posB = other.Position;
-        //             var direction = posA - posB;
-        //             var distanceSqr = direction.sqrMagnitude;
-        //
-        //             if (!(distanceSqr < dominantRangeSqr)) continue;
-        //         
-        //             var distance = Mathf.Sqrt(distanceSqr);
-        //             
-        //             if (distance < 0.0001f)
-        //             {
-        //                 direction = Random.insideUnitCircle * 0.01f;
-        //                 distance = direction.magnitude;
-        //             }
-        //             
-        //             var pushForce = (dominantRange - distance) * 0.1f;
-        //             displacement += direction / distance * pushForce;
-        //         }
-        //
-        //         node.Position += displacement;
-        //     }
-        // }
+        private Vector2Int Cell(Vector2 pos)
+        {
+            return new Vector2Int(
+                Mathf.FloorToInt(pos.x / CellSize),
+                Mathf.FloorToInt(pos.y / CellSize)
+            );
+        }
     }
 }

@@ -45,7 +45,6 @@ namespace UI.DevicePage
                 Graph.Instance.Connections,
                 friction: dampingDecreasePerSecond,
                 charge: repulsionPower);
-            StartSimulation();
         }
 
         public void StartSimulation()
@@ -64,7 +63,6 @@ namespace UI.DevicePage
         {
         }
         
-        //
         // public void HoverNode(NodeComponent nodeComponent)
         // {
         //     if (!_isHighlightingAllowed) return;
