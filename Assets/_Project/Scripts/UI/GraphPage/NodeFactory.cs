@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Threading.Tasks;
+using Core.Models;
 using FDLayout;
 using UnityEngine;
+using VContainer;
 
 namespace UI.DevicePage
 {
@@ -9,29 +11,31 @@ namespace UI.DevicePage
     {
         [SerializeField] private TextAsset jsonFile;
         [SerializeField] private ForceDirectedLayoutPage layoutPage;
-        [SerializeField] private NetworkModel model;
         [SerializeField] private RectTransform container;
         [SerializeField] private float nodeWeighPerEdge = 100;
         [SerializeField] private float nodeRadiusPerEdge = 1;
         [SerializeField] private float creationGap = 0.1f;
 
+        [Inject]
+        private ApplicationData _appData;
+        
         private void Awake()
         {
             StartCoroutine(CreateNodes());
         }
-            
+        
         private IEnumerator CreateNodes()
         {
-            Debug.Log("Node creating started");
-            Debug.Log("Getting devices");
-            var task = NetBoxDataProvider.GetNetworkModel();
+            var task = NetBoxDataLoader.GetNetworkModel();
             yield return new WaitUntil(() => task.Status == TaskStatus.RanToCompletion);
-            model = task.Result;
-            Debug.Log($"GetDevices task is complete. Device count: {model.devices.Count}. Connections: {model.connections.Count}");
+            
+            var data = task.Result;
+            Debug.Log($"GetDevices task is complete. Device count: {data.devices.Count}. Connections: {data.connections.Count}");
 
             var nodes = Graph.Instance.Nodes;
             nodes.Clear();
-            foreach (var device in model.devices)
+            
+            foreach (var device in data.devices)
             {
                 yield return new WaitForSeconds(creationGap);
                 var node = new Node();
@@ -49,7 +53,7 @@ namespace UI.DevicePage
                 layoutPage.StartSimulation();
             }
             
-            foreach (var connection in model.connections)
+            foreach (var connection in data.connections)
             { 
                 yield return new WaitForSeconds(creationGap);
                 var a = nodes[connection.a];

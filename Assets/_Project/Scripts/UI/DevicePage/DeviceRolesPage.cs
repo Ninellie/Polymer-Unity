@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Core.Models;
-using Core.Services;
 using Polymer.UI.Routing;
 using TMPro;
 using UI.ListView;
@@ -77,6 +76,19 @@ namespace UI.DevicePage
 
         public override void OnPageInit(PageArgs args)
         {
+        }
+    }
+
+    internal class DeviceRoleDataService
+    {
+        public void Create(string deviceRoleName, string deviceRoleDescription)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public List<DeviceRole> Get()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

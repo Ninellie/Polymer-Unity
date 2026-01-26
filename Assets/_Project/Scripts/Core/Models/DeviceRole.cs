@@ -11,6 +11,6 @@ namespace Core.Models
         public int Id;
         public string Name;
         public string Description;
-        public string IconPath;
+        public string Color;
     }
 }

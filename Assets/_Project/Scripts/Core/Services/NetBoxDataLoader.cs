@@ -3,20 +3,22 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UI.DevicePage;
 using System.Net.Http.Headers;
+using Core.Models;
+using Device = Core.Models.Device;
 
-public class NetBoxDataProvider
+public class NetBoxDataLoader : IAppDataProvider
 {
     private const string Url = "http://localhost:8000";
     private const string Token = "3b4021bc664b8702e454f4e510da1eb2d80d14de";
 
-    public static async Task<NetworkModel> GetNetworkModel()
+    public ApplicationData AppData { get; private set; }
+    
+    public async Task LoadAsync()
     {
         using var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", Token);
-
-        // Получаем устройства и кабели параллельно для ускорения
+        
         var devicesTask = client.GetStringAsync($"{Url}/api/dcim/devices/?limit=0");
         var cablesTask = client.GetStringAsync($"{Url}/api/dcim/cables/?limit=0");
         var rolesTask = client.GetStringAsync($"{Url}/api/dcim/device-roles/?limit=0");
@@ -34,10 +36,10 @@ public class NetBoxDataProvider
             rolesDict[role.Id] = role;
         }
         
-        var model = new NetworkModel
+        AppData = new ApplicationData
         {
-            devices = new List<Device>(),
-            connections = new List<Connection>()
+            Devices = new List<Device>(),
+            Cables = new List<Cable>()
         };
         
         foreach (var item in devicesData.Results.Where(item => item.Role != null))
@@ -48,12 +50,15 @@ public class NetBoxDataProvider
         // Маппинг устройств
         foreach (var item in devicesData.Results)
         {
-            model.devices.Add(new Device
+            AppData.Devices.Add(new Device
             {
-                id = item.Id,
-                name = item.Name ?? item.Display,
-                role = item.Role?.Name,
-                color = "#" + item.Role?.Color
+                Id = item.Id,
+                Name = item.Name ?? item.Display,
+                Role = new DeviceRole
+                {
+                    Name = item.Role?.Name,
+                    Color = "#" + item.Role?.Color
+                },
             });
         }
 
@@ -65,11 +70,9 @@ public class NetBoxDataProvider
 
             if (idA.HasValue && idB.HasValue)
             {
-                model.connections.Add(new Connection { a = idA.Value, b = idB.Value });
+                AppData.Cables.Add(new Cable { FromDeviceId = idA.Value, ToDeviceId = idB.Value });
             }
         }
-
-        return model;
     }
 
     private static int? GetDeviceId(List<TerminationDto> terminations)

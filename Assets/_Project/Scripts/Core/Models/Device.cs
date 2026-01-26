@@ -6,12 +6,12 @@ namespace Core.Models
     /// Модель устройства с предустановленными параметрами
     /// </summary>
     [Serializable]
-    public class DeviceModel
+    public class Device
     {
         public int Id;
         public string Name;
-        public int DeviceRoleId;
-        public int ManufacturerId;
         public string Description;
+        public DeviceRole Role;
+        public Manufacturer Manufacturer;
     }
 }

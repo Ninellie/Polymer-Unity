@@ -7,7 +7,7 @@ namespace Core.Models
     /// Модель кабельного соединения между устройствами
     /// </summary>
     [Serializable]
-    public class NetworkCable
+    public class Cable
     {
         public int Id;
         public int FromDeviceId;
@@ -15,7 +15,6 @@ namespace Core.Models
         public int ToDeviceId;
         public int ToPortId;
         public string CableType;
-        public string Status = "Active";
-        public Color CableColor = Color.blue;
+        public Color CableColor;
     }
 }
