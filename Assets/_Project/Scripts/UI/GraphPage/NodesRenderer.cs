@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Polymer.UI.GraphPage
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public class GraphRenderer : MonoBehaviour
+    public class NodesRenderer : MonoBehaviour
     {
         [SerializeField] private Material nodeMaterial;
         [SerializeField] private float scale;

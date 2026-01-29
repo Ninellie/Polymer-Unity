@@ -68,7 +68,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   factory: {fileID: 8702187591903853132}
-  graphRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
+  nodesRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
+  linksRenderer: {fileID: 8718519676847808330, guid: 6ce0ec869e3adb5498c2525486d4ca4a, type: 3}
   linkDistance: 75
   springPower: 0.4
   gravityPower: 0.8

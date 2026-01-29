@@ -11,7 +11,8 @@ namespace Polymer.UI.GraphPage
     public class ForceDirectedLayoutPage : PageBase
     {
         [SerializeField] private GraphFactory factory;
-        [SerializeField] private GraphRenderer graphRenderer;
+        [SerializeField] private NodesRenderer nodesRenderer;
+        [SerializeField] private LinksRenderer linksRenderer;
         
         [Header("Spring parameters")]
         [SerializeField] private float linkDistance;
@@ -47,9 +48,11 @@ namespace Polymer.UI.GraphPage
                 friction: dampingDecreasePerSecond,
                 charge: repulsionPower);
 
-            var gr = Instantiate(graphRenderer);
+            var gr = Instantiate(nodesRenderer);
             gr.SetNodes(factory.Nodes);
-            gr.transform.position = new Vector3(0, 0, 0);
+
+            var lr = Instantiate(linksRenderer);
+            lr.SetLinks(factory.Connections);
         }
 
         public void StartSimulation()
