@@ -11,5 +11,6 @@ namespace Core.Models
     {
         public List<Device> Devices { get; set; } = new();
         public List<Cable> Cables { get; set; } = new();
+        public bool Loaded { get; set; }
     }
 }

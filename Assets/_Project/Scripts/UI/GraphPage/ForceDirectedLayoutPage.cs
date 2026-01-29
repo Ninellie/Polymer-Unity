@@ -3,16 +3,17 @@ using Polymer.UI.Routing;
 using TriInspector;
 using UnityEngine;
 
-namespace UI.DevicePage
+namespace Polymer.UI.GraphPage
 {
     /// <summary>
     /// Applies physics forces to nodes
     /// </summary>
     public class ForceDirectedLayoutPage : PageBase
     {
-        [SerializeField] private NodeFactory factory;
+        [SerializeField] private GraphFactory factory;
+        [SerializeField] private GraphRenderer graphRenderer;
+        
         [Header("Spring parameters")]
-
         [SerializeField] private float linkDistance;
         [SerializeField] private float springPower;
         
@@ -41,10 +42,14 @@ namespace UI.DevicePage
         private void Start()
         {
             _layout = new ForceDirectedLayout(
-                Graph.Instance.Nodes,
-                Graph.Instance.Connections,
+                factory.Nodes,
+                factory.Connections,
                 friction: dampingDecreasePerSecond,
                 charge: repulsionPower);
+
+            var gr = Instantiate(graphRenderer);
+            gr.SetNodes(factory.Nodes);
+            gr.transform.position = new Vector3(0, 0, 0);
         }
 
         public void StartSimulation()

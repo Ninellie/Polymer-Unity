@@ -1,13 +1,16 @@
+using System.Collections.Generic;
+using FDLayout;
 using UnityEngine;
 
-namespace UI.DevicePage
+namespace Polymer.UI.GraphPage
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class GraphRenderer : MonoBehaviour
     {
         [SerializeField] private Material nodeMaterial;
         [SerializeField] private float scale;
-        
+
+        private List<Node> _nodes;
         private Mesh _mesh;
         private Vector3[] _vertices;
         private int[] _indices;
@@ -15,7 +18,7 @@ namespace UI.DevicePage
         private Vector2[] _uvs;
         private int _lastNodeCount = 0;
         
-        private Mesh quadMesh;
+        private Mesh _quadMesh;
         
         private void Start()
         {
@@ -27,10 +30,10 @@ namespace UI.DevicePage
             
             GetComponent<MeshRenderer>().material = nodeMaterial;
         }
+        
         private void LateUpdate()
         {
-            var nodes = Graph.Instance.Nodes;
-            var nodeCount = nodes.Count;
+            var nodeCount = _nodes.Count;
 
             if (nodeCount == 0) return;
             
@@ -42,7 +45,7 @@ namespace UI.DevicePage
                 _uvs = new Vector2[nodeCount * 4];
 
                 var i = 0;
-                foreach (var node in nodes)
+                foreach (var node in _nodes)
                 {
                     var v = i * 4;
                     var t = i * 6;
@@ -78,7 +81,7 @@ namespace UI.DevicePage
 
             // Обновляем позиции
             var index = 0;
-            foreach (var node in nodes)
+            foreach (var node in _nodes)
             {
                 var r = node.Radius * scale;
                 var pos = node.Position * scale;
@@ -94,6 +97,11 @@ namespace UI.DevicePage
 
             _mesh.vertices = _vertices;
             _mesh.RecalculateBounds();
+        }
+
+        public void SetNodes(List<Node> nodes)
+        {
+            _nodes = nodes;
         }
     }
 }

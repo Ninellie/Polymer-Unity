@@ -50,11 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d842b637000c4123b912c4bc2898cabc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
   layoutPage: {fileID: 2329843997727704188}
-  model:
-    devices: []
-    connections: []
   container: {fileID: 6771356685698472314}
   nodeWeighPerEdge: 1
   nodeRadiusPerEdge: 0.1
@@ -72,6 +68,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   factory: {fileID: 8702187591903853132}
+  graphRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
   linkDistance: 75
   springPower: 0.4
   gravityPower: 0.8

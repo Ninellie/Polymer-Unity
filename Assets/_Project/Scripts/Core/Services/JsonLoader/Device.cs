@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UI.DevicePage
+namespace Polymer.Services.JsonLoader
 {
     [Serializable]
     public class Device

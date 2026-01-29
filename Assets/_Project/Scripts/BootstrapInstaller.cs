@@ -1,3 +1,6 @@
+using Core.Models;
+using Polymer.Services.JsonLoader;
+using Polymer.Services.NetBoxLoader;
 using Polymer.UI;
 using Polymer.UI.Routing;
 using VContainer;
@@ -10,11 +13,24 @@ namespace Polymer
     {
         [SerializeField] private PageRoutingSettings pageRoutingSettings;
         [SerializeField] private Transform pageRoot;
+        [SerializeField] private bool useJsonFile;
+        [SerializeField] private TextAsset jsonFile;
         
         protected override void Configure(IContainerBuilder builder)
         {
-            // Data access object
+            builder.Register<ApplicationData>(Lifetime.Singleton);
+
+            if (useJsonFile)
+            {
+                builder.RegisterInstance(jsonFile);
+                builder.RegisterEntryPoint<JsonDataLoader>();
+            }
+            else
+            {
+                builder.RegisterEntryPoint<NetBoxDataLoader>();
+            }
             
+            // Page routing
             var routeTable = CreateRouteTable();
             builder.RegisterInstance(routeTable);
             builder.RegisterEntryPoint<PageRouter>().AsSelf();

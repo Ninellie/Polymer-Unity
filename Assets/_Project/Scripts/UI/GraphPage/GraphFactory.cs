@@ -1,63 +1,61 @@
 using System.Collections;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Core.Models;
 using FDLayout;
 using UnityEngine;
 using VContainer;
 
-namespace UI.DevicePage
+namespace Polymer.UI.GraphPage
 {
-    public class NodeFactory : MonoBehaviour
+    public class GraphFactory : MonoBehaviour
     {
-        [SerializeField] private TextAsset jsonFile;
         [SerializeField] private ForceDirectedLayoutPage layoutPage;
         [SerializeField] private RectTransform container;
         [SerializeField] private float nodeWeighPerEdge = 100;
         [SerializeField] private float nodeRadiusPerEdge = 1;
         [SerializeField] private float creationGap = 0.1f;
 
-        [Inject]
-        private ApplicationData _appData;
+        public List<Node> Nodes { get; } = new();
+        public List<(Node a, Node b)> Connections { get; } = new();
         
-        private void Awake()
+        [Inject] private ApplicationData _appData; 
+        
+        private void Start()
         {
             StartCoroutine(CreateNodes());
         }
         
         private IEnumerator CreateNodes()
         {
-            var task = NetBoxDataLoader.GetNetworkModel();
-            yield return new WaitUntil(() => task.Status == TaskStatus.RanToCompletion);
+            yield return new WaitWhile(() => !_appData.Loaded);
             
-            var data = task.Result;
-            Debug.Log($"GetDevices task is complete. Device count: {data.devices.Count}. Connections: {data.connections.Count}");
-
-            var nodes = Graph.Instance.Nodes;
-            nodes.Clear();
+            Nodes.Clear();
+            Connections.Clear();
             
-            foreach (var device in data.devices)
+            foreach (var device in _appData.Devices)
             {
                 yield return new WaitForSeconds(creationGap);
                 var node = new Node();
                 node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
-                node.Id = device.id;
+                node.Id = device.Id;
                 node.Weight = 1;
                 node.Radius = 15;
                 
-                if (ColorUtility.TryParseHtmlString(device.color, out var color))
+                if (ColorUtility.TryParseHtmlString(device.Role.Color, out var color))
                 {
                     node.Color = color;
                 }
                 
-                Graph.Instance.Nodes.Add(node);
+                Nodes.Add(node);
                 layoutPage.StartSimulation();
             }
             
-            foreach (var connection in data.connections)
+            foreach (var connection in _appData.Cables)
             { 
                 yield return new WaitForSeconds(creationGap);
-                var a = nodes[connection.a];
-                var b = nodes[connection.b];
+                var a = Nodes.First(node => node.Id == connection.FromDeviceId);
+                var b = Nodes.First(node => node.Id == connection.ToDeviceId);
                 
                 a.Weight += nodeWeighPerEdge;
                 b.Weight += nodeWeighPerEdge;
@@ -68,7 +66,7 @@ namespace UI.DevicePage
                 a.Radius += nodeRadiusPerEdge;
                 b.Radius += nodeRadiusPerEdge;
 
-                Graph.Instance.Connections.Add((a, b));
+                Connections.Add((a, b));
                 
                 layoutPage.StartSimulation();
             }

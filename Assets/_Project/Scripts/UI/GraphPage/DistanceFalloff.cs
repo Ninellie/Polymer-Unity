@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UI.DevicePage
+namespace Polymer.UI.GraphPage
 {
     public static class DistanceFalloff
     {
