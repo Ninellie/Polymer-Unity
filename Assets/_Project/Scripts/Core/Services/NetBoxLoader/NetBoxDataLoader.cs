@@ -23,7 +23,7 @@ namespace Polymer.Services.NetBoxLoader
 
         public void Initialize()
         {
-            LoadAsync();
+            _ = LoadAsync();
         }
         
         private async Task LoadAsync()
@@ -47,12 +47,6 @@ namespace Polymer.Services.NetBoxLoader
             {
                 rolesDict[role.Id] = role;
             }
-
-            _appData = new ApplicationData
-            {
-                Devices = new List<Device>(),
-                Cables = new List<Cable>()
-            };
 
             foreach (var item in devicesData.Results.Where(item => item.Role != null))
             {
