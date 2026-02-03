@@ -14,7 +14,7 @@ namespace Polymer.Services.NetBoxLoader
         private const string Url = "http://localhost:8000";
         private const string Token = "3b4021bc664b8702e454f4e510da1eb2d80d14de";
 
-        private ApplicationData _appData;
+        private readonly ApplicationData _appData;
 
         public NetBoxDataLoader(ApplicationData appData)
         {

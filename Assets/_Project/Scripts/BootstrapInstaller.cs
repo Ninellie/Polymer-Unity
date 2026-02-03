@@ -30,6 +30,10 @@ namespace Polymer
                 builder.RegisterEntryPoint<NetBoxDataLoader>();
             }
             
+            
+            // Graph page
+            
+            
             // Page routing
             var routeTable = CreateRouteTable();
             builder.RegisterInstance(routeTable);
