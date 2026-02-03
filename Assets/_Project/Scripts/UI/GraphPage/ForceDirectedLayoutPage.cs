@@ -13,6 +13,7 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private GraphFactory factory;
         [SerializeField] private NodesRenderer nodesRenderer;
         [SerializeField] private LinksRenderer linksRenderer;
+        [SerializeField] private GraphSettings settings;
         
         [Header("Spring parameters")]
         [SerializeField] private float linkDistance;
@@ -34,20 +35,17 @@ namespace Polymer.UI.GraphPage
         
         [SerializeField] private float overlapRepulsion;
 
-        [SerializeField] [ReadOnly] private bool _isSimulated;
-        
         // [SerializeField] [ReadOnly] private NodeComponent _selected;
 
-        private ForceDirectedLayout _layout;
+        public ForceDirectedLayout Layout { get; private set; }
         
         private void Start()
         {
-            _layout = new ForceDirectedLayout(
-                factory.Nodes,
-                factory.Connections,
-                friction: dampingDecreasePerSecond,
-                charge: repulsionPower);
-
+            StartCoroutine(factory.CreateNodes());
+            
+            Layout = new ForceDirectedLayout(factory.Nodes, factory.Connections);
+            settings.Init(Layout);
+            
             var gr = Instantiate(nodesRenderer);
             gr.SetNodes(factory.Nodes);
 
@@ -55,16 +53,9 @@ namespace Polymer.UI.GraphPage
             lr.SetLinks(factory.Connections);
         }
 
-        public void StartSimulation()
-        {
-            _layout.Start();
-            damping = baseDamping;
-            _isSimulated = true;
-        }
-
         private void Update()
         {
-            _layout.Tick(Time.deltaTime);
+            Layout.Tick(Time.deltaTime);
         }
         
         public override void OnPageInit(PageArgs args)

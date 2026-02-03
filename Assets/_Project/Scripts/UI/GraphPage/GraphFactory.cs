@@ -21,12 +21,7 @@ namespace Polymer.UI.GraphPage
         
         [Inject] private ApplicationData _appData; 
         
-        private void Start()
-        {
-            StartCoroutine(CreateNodes());
-        }
-        
-        private IEnumerator CreateNodes()
+        public IEnumerator CreateNodes()
         {
             yield return new WaitWhile(() => !_appData.Loaded);
             
@@ -48,7 +43,7 @@ namespace Polymer.UI.GraphPage
                 }
                 
                 Nodes.Add(node);
-                layoutPage.StartSimulation();
+                layoutPage.Layout.Start();
             }
             
             foreach (var connection in _appData.Cables)
@@ -68,7 +63,7 @@ namespace Polymer.UI.GraphPage
 
                 Connections.Add((a, b));
                 
-                layoutPage.StartSimulation();
+                layoutPage.Layout.Start();
             }
         }
     }

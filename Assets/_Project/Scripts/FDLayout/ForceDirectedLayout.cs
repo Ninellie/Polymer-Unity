@@ -14,8 +14,8 @@ namespace FDLayout
         public float LinkStrength { get; set; }
         public float Friction { get; set; } // alpha decrease per second
         public float Charge { get; set; }
-        public float Theta { get; set; }
-        public float Alpha { get; set; }
+        public float Theta { get; set; } // Berns-Hutt distance
+        public float Alpha { get; set; } // Base dumping
 
         public float MaxVelocity { get; set; }
 
@@ -28,14 +28,16 @@ namespace FDLayout
         private readonly Dictionary<Vector2Int, List<Node>> _grid = new();
         private readonly Stack<List<Node>> _listPool = new();
 
+        // private readonly Dictionary<string, float> _settings = new();
+        
         public ForceDirectedLayout(
             List<Node> nodes = null,
             List<(Node a, Node b)> links = null,
             float gravity = 1,
             float linkDistance = 75,
             float linkStrength = 0.4f,
-            float friction = 1,
-            float charge = 2,
+            float friction = 3,
+            float charge = 3,
             float theta = 0.8f,
             float alpha = 1,
             float maxVelocity = 600,

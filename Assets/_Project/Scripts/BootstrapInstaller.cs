@@ -1,4 +1,5 @@
 using Core.Models;
+using FDLayout;
 using Polymer.Services.JsonLoader;
 using Polymer.Services.NetBoxLoader;
 using Polymer.UI;
@@ -30,9 +31,7 @@ namespace Polymer
                 builder.RegisterEntryPoint<NetBoxDataLoader>();
             }
             
-            
             // Graph page
-            
             
             // Page routing
             var routeTable = CreateRouteTable();
