@@ -19,11 +19,12 @@ namespace FDLayout
 
         public float MaxVelocity { get; set; }
 
-        public bool IsSimulated { get; set; }
         public float CellSize { get; set; }
         public float DominantRange { get; set; }
 
         private float _damping;
+        private bool _isSimulated;
+        private bool _isColliding;
 
         private readonly Dictionary<Vector2Int, List<Node>> _grid = new();
         private readonly Stack<List<Node>> _listPool = new();
@@ -35,14 +36,14 @@ namespace FDLayout
             List<(Node a, Node b)> links = null,
             float gravity = 1,
             float linkDistance = 75,
-            float linkStrength = 0.4f,
-            float friction = 3,
-            float charge = 3,
+            float linkStrength = 1f,
+            float friction = 0.05f,
+            float charge = 5,
             float theta = 0.8f,
             float alpha = 1,
             float maxVelocity = 600,
             float cellSize = 40,
-            float dominantRange = 40)
+            float dominantRange = 5)
         {
             Nodes = nodes;
             Links = links;
@@ -61,14 +62,19 @@ namespace FDLayout
         public void Start()
         {
             _damping = Alpha;
-            IsSimulated = true;
+            _isSimulated = true;
+            _isColliding = true;
         }
 
         public void Tick(float dt)
         {
+            if (!_isColliding) return;
+            
+            UpdateCellSize();
+
             ApplyCollisionRepulsion();
 
-            if (!IsSimulated) return;
+            if (!_isSimulated) return;
 
             ClearForces();
 
@@ -77,10 +83,10 @@ namespace FDLayout
             TranslateNodes(dt);
 
             _damping -= Friction * dt;
-
+            
             if (_damping > 0) return;
 
-            IsSimulated = false;
+            _isSimulated = false;
         }
 
         private void ApplyForces()
@@ -141,24 +147,18 @@ namespace FDLayout
                 var delta = connection.b.Position - connection.a.Position;
                 var distance = delta.magnitude;
                 if (distance < 0.0001f) continue;
-
-                var displacement = distance - LinkDistance;
                 
+                var targetDistance = LinkDistance + connection.a.Radius + connection.b.Radius;
+                var displacement = distance - targetDistance;
+        
                 var transition = (delta / distance) * (displacement * LinkStrength);
                 var totalWeight = connection.a.Weight + connection.b.Weight;
 
-                var aTransition = transition * (connection.b.Weight / totalWeight);
-                var bTransition = transition * (connection.a.Weight / totalWeight);
-
                 if (!connection.a.IsFixed)
-                {
-                    connection.a.Force += aTransition;
-                }
+                    connection.a.Force += transition * (connection.b.Weight / totalWeight);
 
                 if (!connection.b.IsFixed)
-                {
-                    connection.b.Force -= bTransition;
-                }
+                    connection.b.Force -= transition * (connection.a.Weight / totalWeight);
             }
         }
 
@@ -203,20 +203,20 @@ namespace FDLayout
                 list.Add(node);
             }
 
+            var hasMovement = false;
+
             Parallel.ForEach(Nodes, node =>
             {
                 if (node.IsFixed) return;
 
                 var displacement = Vector2.zero;
                 var cell = Cell(node.Position);
-                var rangeSqr = DominantRange * DominantRange;
 
                 for (var dx = -1; dx <= 1; dx++)
                 {
                     for (var dy = -1; dy <= 1; dy++)
                     {
                         var neighborCell = cell + new Vector2Int(dx, dy);
-                        
                         if (!_grid.TryGetValue(neighborCell, out var others))
                             continue;
 
@@ -227,17 +227,36 @@ namespace FDLayout
                             var dir = node.Position - other.Position;
                             var distSqr = dir.sqrMagnitude;
 
+                            var currentRange = node.Radius + other.Radius + DominantRange;
+                            var rangeSqr = currentRange * currentRange;
+
                             if (distSqr > rangeSqr || distSqr < 0.0001f) continue;
 
                             var dist = Mathf.Sqrt(distSqr);
-                            
-                            displacement += dir / dist * ((DominantRange - dist) * 0.1f);
+                            displacement += dir / dist * ((currentRange - dist) * 0.1f);
                         }
                     }
                 }
 
+                if (!(displacement.sqrMagnitude > 0.0001f)) return;
                 node.Position += displacement;
+                hasMovement = true;
             });
+
+            if (hasMovement) return;
+            if (_isSimulated) return;
+            
+            _isColliding = false;
+        }
+        
+        private void UpdateCellSize()
+        {
+            float maxRadius = 0;
+            foreach (var node in Nodes)
+            {
+                if (node.Radius > maxRadius) maxRadius = node.Radius;
+            }
+            CellSize = Mathf.Max(CellSize, maxRadius * 2f);
         }
         
         private Vector2Int Cell(Vector2 pos)

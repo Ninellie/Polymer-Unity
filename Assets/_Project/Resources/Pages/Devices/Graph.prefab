@@ -131,7 +131,7 @@ MonoBehaviour:
   layoutPage: {fileID: 2329843997727704188}
   container: {fileID: 6771356685698472314}
   nodeWeighPerEdge: 1
-  nodeRadiusPerEdge: 0.1
+  nodeRadiusPerEdge: 1
   creationGap: 0.05
 --- !u!114 &2329843997727704188
 MonoBehaviour:
