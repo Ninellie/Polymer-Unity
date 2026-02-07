@@ -11,6 +11,8 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private float thickness = 0.1f;
         [SerializeField] private float scale = 1f;
 
+        public bool IsRendering { get; set; } = true;
+        
         private List<(Node a, Node b)> _links;
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -28,6 +30,8 @@ namespace Polymer.UI.GraphPage
 
         private void LateUpdate()
         {
+            if (!IsRendering) return;
+            
             var linkCount = _links.Count;
 
             if (linkCount == 0) { _mesh.Clear(); return; }

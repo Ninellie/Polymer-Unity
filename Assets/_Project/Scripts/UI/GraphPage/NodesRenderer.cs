@@ -10,6 +10,8 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private Material nodeMaterial;
         [SerializeField] private float scale;
 
+        public bool IsRendering { get; set; } = true;
+        
         private List<Node> _nodes;
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -33,6 +35,8 @@ namespace Polymer.UI.GraphPage
         
         private void LateUpdate()
         {
+            if (!IsRendering) return;
+            
             var nodeCount = _nodes.Count;
 
             if (nodeCount == 0) return;

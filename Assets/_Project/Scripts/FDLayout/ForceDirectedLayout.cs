@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,23 +17,20 @@ namespace FDLayout
         public float Charge { get; set; }
         public float Theta { get; set; } // Berns-Hutt distance
         public float Alpha { get; set; } // Base dumping
-
         public float MaxVelocity { get; set; }
-
+        public float SpeedMultiplier { get; set; }
         public float CellSize { get; set; }
         public float DominantRange { get; set; }
+        
+        public bool IsSimulated { get; set; }
+        public bool IsColliding { get; set; }
 
         private float _damping;
-        private bool _isSimulated;
-        private bool _isColliding;
-
+        
         private readonly Dictionary<Vector2Int, List<Node>> _grid = new();
         private readonly Stack<List<Node>> _listPool = new();
-
-        // private readonly Dictionary<string, float> _settings = new();
         
-        public ForceDirectedLayout(
-            List<Node> nodes = null,
+        public ForceDirectedLayout(List<Node> nodes = null,
             List<(Node a, Node b)> links = null,
             float gravity = 1,
             float linkDistance = 75,
@@ -42,6 +40,7 @@ namespace FDLayout
             float theta = 0.8f,
             float alpha = 1,
             float maxVelocity = 600,
+            float speedMultiplier = 1,
             float cellSize = 40,
             float dominantRange = 5)
         {
@@ -55,6 +54,7 @@ namespace FDLayout
             Theta = theta;
             Alpha = alpha;
             MaxVelocity = maxVelocity;
+            SpeedMultiplier = speedMultiplier;
             CellSize = cellSize;
             DominantRange = dominantRange;
         }
@@ -62,31 +62,31 @@ namespace FDLayout
         public void Start()
         {
             _damping = Alpha;
-            _isSimulated = true;
-            _isColliding = true;
+            IsSimulated = true;
+            IsColliding = true;
         }
 
         public void Tick(float dt)
         {
-            if (!_isColliding) return;
+            if (!IsColliding) return;
             
             UpdateCellSize();
 
             ApplyCollisionRepulsion();
 
-            if (!_isSimulated) return;
+            if (!IsSimulated) return;
 
             ClearForces();
 
             ApplyForces();
 
-            TranslateNodes(dt);
+            TranslateNodes(dt * SpeedMultiplier);
 
-            _damping -= Friction * dt;
+            _damping -= Friction * dt * SpeedMultiplier;
             
             if (_damping > 0) return;
 
-            _isSimulated = false;
+            IsSimulated = false;
         }
 
         private void ApplyForces()
@@ -203,7 +203,7 @@ namespace FDLayout
                 list.Add(node);
             }
 
-            var hasMovement = false;
+            var moveCounter = 0;
 
             Parallel.ForEach(Nodes, node =>
             {
@@ -238,15 +238,17 @@ namespace FDLayout
                     }
                 }
 
-                if (!(displacement.sqrMagnitude > 0.0001f)) return;
-                node.Position += displacement;
-                hasMovement = true;
+                if (displacement.sqrMagnitude > 0.01f)
+                {
+                    node.Position += displacement;
+                    Interlocked.Exchange(ref moveCounter, 1);
+                }
             });
 
-            if (hasMovement) return;
-            if (_isSimulated) return;
+            if (moveCounter > 0) return;
+            if (IsSimulated) return;
             
-            _isColliding = false;
+            IsColliding = false;
         }
         
         private void UpdateCellSize()

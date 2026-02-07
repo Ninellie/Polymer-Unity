@@ -12,7 +12,7 @@ namespace Polymer.UI.GraphPage
     {
         [SerializeField] private ForceDirectedLayoutPage layoutPage;
         [SerializeField] private RectTransform container;
-        [SerializeField] private float nodeWeighPerEdge = 100;
+        [SerializeField] private float nodeWeighPerEdge = 1;
         [SerializeField] private float nodeRadiusPerEdge = 1;
         [SerializeField] private float creationGap = 0.1f;
 

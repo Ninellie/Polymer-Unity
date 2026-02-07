@@ -11,6 +11,7 @@ namespace Polymer.UI.GraphPage
 
         public void Init(ForceDirectedLayout layout)
         {
+            Create("Speed", layout.SpeedMultiplier, v => { layout.SpeedMultiplier = v; layout.Start(); });
             Create("Gravity", layout.Gravity, v => { layout.Gravity = v; layout.Start(); });
             Create("Link Distance", layout.LinkDistance, v => { layout.LinkDistance = v; layout.Start(); });
             Create("Link Strength", layout.LinkStrength, v => { layout.LinkStrength = v; layout.Start(); });

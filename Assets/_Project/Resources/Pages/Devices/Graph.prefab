@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 0}
+  m_SizeDelta: {x: 3, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &4197264189690364482
 MonoBehaviour:
@@ -55,11 +55,11 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 2
-  m_Spacing: 5
+  m_Spacing: 0
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 0
+  m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -130,8 +130,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layoutPage: {fileID: 2329843997727704188}
   container: {fileID: 6771356685698472314}
-  nodeWeighPerEdge: 1
-  nodeRadiusPerEdge: 1
+  nodeWeighPerEdge: 0.2
+  nodeRadiusPerEdge: 0.2
   creationGap: 0.05
 --- !u!114 &2329843997727704188
 MonoBehaviour:
@@ -149,15 +149,7 @@ MonoBehaviour:
   nodesRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
   linksRenderer: {fileID: 8718519676847808330, guid: 6ce0ec869e3adb5498c2525486d4ca4a, type: 3}
   settings: {fileID: 3443341597787796938}
-  linkDistance: 75
-  springPower: 0.4
-  gravityPower: 0.8
-  repulsionPower: 3
-  maxVelocity: 600
-  damping: 1
-  baseDamping: 1
-  dampingDecreasePerSecond: 0
-  overlapRepulsion: 40
+  mode: 0
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0

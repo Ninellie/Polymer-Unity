@@ -1,6 +1,5 @@
 using FDLayout;
 using Polymer.UI.Routing;
-using TriInspector;
 using UnityEngine;
 
 namespace Polymer.UI.GraphPage
@@ -15,29 +14,12 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private LinksRenderer linksRenderer;
         [SerializeField] private GraphSettings settings;
         
-        [Header("Spring parameters")]
-        [SerializeField] private float linkDistance;
-        [SerializeField] private float springPower;
-        
-        [Header("Gravity parameters")]
-        [SerializeField] private float gravityPower;
-        
-        [Header("Gravity parameters")]
-        [SerializeField] private float repulsionPower;
-        
-        [Header("Velocity parameters")]
-        [SerializeField] private float maxVelocity;
-        
-        [Header("Damping parameters")]
-        [SerializeField] [ReadOnly] private float damping;
-        [SerializeField] private float baseDamping;
-        [SerializeField] private float dampingDecreasePerSecond = 3f;
-        
-        [SerializeField] private float overlapRepulsion;
-
         // [SerializeField] [ReadOnly] private NodeComponent _selected;
 
         public ForceDirectedLayout Layout { get; private set; }
+        
+        private NodesRenderer _nodesRenderer;
+        private LinksRenderer _linksRenderer;
         
         private void Start()
         {
@@ -46,16 +28,18 @@ namespace Polymer.UI.GraphPage
             Layout = new ForceDirectedLayout(factory.Nodes, factory.Connections);
             settings.Init(Layout);
             
-            var gr = Instantiate(nodesRenderer);
-            gr.SetNodes(factory.Nodes);
+            _nodesRenderer = Instantiate(nodesRenderer);
+            _nodesRenderer.SetNodes(factory.Nodes);
 
-            var lr = Instantiate(linksRenderer);
-            lr.SetLinks(factory.Connections);
+            _linksRenderer = Instantiate(linksRenderer);
+            _linksRenderer.SetLinks(factory.Connections);
         }
 
         private void Update()
         {
             Layout.Tick(Time.deltaTime);
+            _nodesRenderer.IsRendering = Layout.IsColliding;
+            _linksRenderer.IsRendering = Layout.IsColliding;
         }
         
         public override void OnPageInit(PageArgs args)
