@@ -13,6 +13,7 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private NodesRenderer nodesRenderer;
         [SerializeField] private LinksRenderer linksRenderer;
         [SerializeField] private GraphSettings settings;
+        [SerializeField] private bool isGeometric = true;
         
         // [SerializeField] [ReadOnly] private NodeComponent _selected;
 
@@ -25,7 +26,7 @@ namespace Polymer.UI.GraphPage
         {
             StartCoroutine(factory.CreateNodes());
             
-            Layout = new ForceDirectedLayout(factory.Nodes, factory.Connections);
+            Layout = new ForceDirectedLayout(factory.Nodes, factory.Connections, isGeometric: isGeometric);
             settings.Init(Layout);
             
             _nodesRenderer = Instantiate(nodesRenderer);
@@ -38,6 +39,7 @@ namespace Polymer.UI.GraphPage
         private void Update()
         {
             Layout.Tick(Time.deltaTime);
+            Layout.IsGeometric = isGeometric;
             _nodesRenderer.IsRendering = Layout.IsColliding;
             _linksRenderer.IsRendering = Layout.IsColliding;
         }

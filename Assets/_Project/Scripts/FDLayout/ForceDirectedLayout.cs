@@ -21,10 +21,11 @@ namespace FDLayout
         public float SpeedMultiplier { get; set; }
         public float CellSize { get; set; }
         public float DominantRange { get; set; }
+        public bool IsGeometric { get; set; }
         
         public bool IsSimulated { get; set; }
         public bool IsColliding { get; set; }
-
+        
         private float _damping;
         
         private readonly Dictionary<Vector2Int, List<Node>> _grid = new();
@@ -42,7 +43,8 @@ namespace FDLayout
             float maxVelocity = 600,
             float speedMultiplier = 1,
             float cellSize = 40,
-            float dominantRange = 5)
+            float dominantRange = 5,
+            bool isGeometric = true)
         {
             Nodes = nodes;
             Links = links;
@@ -57,6 +59,7 @@ namespace FDLayout
             SpeedMultiplier = speedMultiplier;
             CellSize = cellSize;
             DominantRange = dominantRange;
+            IsGeometric = isGeometric;
         }
 
         public void Start()
@@ -176,7 +179,12 @@ namespace FDLayout
             foreach (var node in Nodes)
             {
                 if (node.IsFixed) continue;
-                node.Velocity = node.Force * dt;
+                
+                if (IsGeometric)
+                    node.Velocity = node.Force * dt;
+                else
+                    node.Velocity += node.Force * dt;
+                
                 node.Velocity *= _damping;
                 node.Velocity = Vector2.ClampMagnitude(node.Velocity, MaxVelocity);
                 node.Position += node.Velocity;
