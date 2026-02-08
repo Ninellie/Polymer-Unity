@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -61,6 +62,58 @@ namespace FDLayout
             DominantRange = dominantRange;
             IsGeometric = isGeometric;
         }
+        
+        private void ApplyTangentialRepulsion()
+        {
+            foreach (var center in Nodes)
+            {
+                // Все пары соседей этого узла
+                var neighbors = center.Links.ToList();
+                if (neighbors.Count < 2) continue;
+
+                for (var i = 0; i < neighbors.Count; i++)
+                {
+                    for (var j = i + 1; j < neighbors.Count; j++)
+                    {
+                        var a = neighbors[i];
+                        var b = neighbors[j];
+
+                        if (a.IsFixed && b.IsFixed) continue;
+
+                        var ca = a.Position - center.Position;
+                        var cb = b.Position - center.Position;
+
+                        var distA = ca.magnitude;
+                        var distB = cb.magnitude;
+
+                        if (distA < 0.1f || distB < 0.1f) continue;
+
+                        // Найти текущий угол между ними. Скалярное произведение 
+                        var dot = Vector2.Dot(ca.normalized, cb.normalized);
+                        // Если узлы и так на разных сторонах (180 градусов), сила не нужна
+                        if (dot < -0.99f) continue; 
+
+                        // Определить "тангенциальное" направление для узла A
+                        // Это вектор, перпендикулярный радиусу CA, направленный от B
+                        var tangentA = new Vector2(-ca.y, ca.x).normalized;
+                        // Проверка, в ту ли сторону направлен тангент (должен быть от B)
+                        if (Vector2.Dot(tangentA, cb) > 0) tangentA = -tangentA;
+
+                        // Сила тем выше, чем меньше угол (чем ближе они друг к другу на дуге)
+                        // Можно использовать (1 + dot) как множитель (растет от 0 до 2, когда угол мал)
+                        var strength = (1f + dot) * 20f;
+
+                        if (!a.IsFixed) a.Force += tangentA * strength;
+                        
+                        // Для узла B тангент будет зеркальным
+                        var tangentB = new Vector2(-cb.y, cb.x).normalized;
+                        if (Vector2.Dot(tangentB, ca) > 0) tangentB = -tangentB;
+                        
+                        if (!b.IsFixed) b.Force += tangentB * strength;
+                    }
+                }
+            }
+        }
 
         public void Start()
         {
@@ -97,6 +150,7 @@ namespace FDLayout
             if (LinkStrength > 0) ApplySpringForces();
             if (Gravity > 0) ApplyGravity();
             if (Charge > 0) ApplyRepulsion();
+            ApplyTangentialRepulsion();
         }
 
         private void ClearForces()

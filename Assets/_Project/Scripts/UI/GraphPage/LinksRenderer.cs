@@ -8,11 +8,17 @@ namespace Polymer.UI.GraphPage
     public class LinksRenderer : MonoBehaviour
     {
         [SerializeField] private Material linkMaterial;
-        [SerializeField] private float thickness = 0.1f;
-        [SerializeField] private float scale = 1f;
+        [SerializeField] private float thickness;
+        [SerializeField] private float scale;
 
         public bool IsRendering { get; set; } = true;
-        
+
+        public float Scale
+        {
+            get => scale;
+            set => scale = value;
+        }
+
         private List<(Node a, Node b)> _links;
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -31,10 +37,19 @@ namespace Polymer.UI.GraphPage
         private void LateUpdate()
         {
             if (!IsRendering) return;
-            
+
+            RecalculateMesh();
+        }
+
+        public void RecalculateMesh()
+        {
             var linkCount = _links.Count;
 
-            if (linkCount == 0) { _mesh.Clear(); return; }
+            if (linkCount == 0)
+            {
+                _mesh.Clear();
+                return;
+            }
 
             if (linkCount != _lastLinkCount)
             {
@@ -58,7 +73,7 @@ namespace Polymer.UI.GraphPage
             for (var i = 0; i < linkCount; i++)
             {
                 var link = _links[i];
-                UpdateLinkGeometry(i, link.a.Position * scale, link.b.Position * scale, link.a.Color, link.b.Color);
+                UpdateLinkGeometry(i, link.a.Position * Scale, link.b.Position * Scale, link.a.Color, link.b.Color);
             }
 
             _mesh.vertices = _vertices;

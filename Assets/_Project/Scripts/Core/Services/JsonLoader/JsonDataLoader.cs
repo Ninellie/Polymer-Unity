@@ -21,7 +21,7 @@ namespace Polymer.Services.JsonLoader
 
             foreach (var device in model.devices)
             {
-                _appData.Devices.Add(new Core.Models.Device()
+                _appData.Devices.Add(new Device()
                 {
                     Id = device.id,
                     Name = device.name,

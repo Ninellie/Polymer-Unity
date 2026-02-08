@@ -1,5 +1,5 @@
 using Core.Models;
-using FDLayout;
+using Polymer.Core.Input;
 using Polymer.Services.JsonLoader;
 using Polymer.Services.NetBoxLoader;
 using Polymer.UI;
@@ -19,8 +19,10 @@ namespace Polymer
         
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.RegisterEntryPoint<InputManager>().AsSelf();
+            
             builder.Register<ApplicationData>(Lifetime.Singleton);
-
+            
             if (useJsonFile)
             {
                 builder.RegisterInstance(jsonFile);

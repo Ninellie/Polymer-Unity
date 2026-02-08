@@ -100,4 +100,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeMaterial: {fileID: 2100000, guid: 9a6b8871adc4f1849a2dc0e798127648, type: 2}
-  scale: 0.008
+  scale: 0.006

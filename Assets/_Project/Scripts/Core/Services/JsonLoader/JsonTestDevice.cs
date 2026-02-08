@@ -3,7 +3,7 @@
 namespace Polymer.Services.JsonLoader
 {
     [Serializable]
-    public class Device
+    public class JsonTestDevice
     {
         public int id;
         public string name;

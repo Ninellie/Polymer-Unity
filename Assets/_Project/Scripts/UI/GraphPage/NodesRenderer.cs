@@ -11,7 +11,13 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private float scale;
 
         public bool IsRendering { get; set; } = true;
-        
+
+        public float Scale
+        {
+            get => scale;
+            set => scale = value;
+        }
+
         private List<Node> _nodes;
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -36,7 +42,12 @@ namespace Polymer.UI.GraphPage
         private void LateUpdate()
         {
             if (!IsRendering) return;
-            
+
+            RecalculateMesh();
+        }
+
+        public void RecalculateMesh()
+        {
             var nodeCount = _nodes.Count;
 
             if (nodeCount == 0) return;
@@ -87,8 +98,8 @@ namespace Polymer.UI.GraphPage
             var index = 0;
             foreach (var node in _nodes)
             {
-                var r = node.Radius * scale;
-                var pos = node.Position * scale;
+                var r = node.Radius * Scale;
+                var pos = node.Position * Scale;
 
                 var v = index * 4;
                 _vertices[v] = new Vector3(pos.x - r, pos.y - r, 0);

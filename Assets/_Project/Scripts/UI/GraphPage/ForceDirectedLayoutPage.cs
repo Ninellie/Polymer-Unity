@@ -1,6 +1,8 @@
 using FDLayout;
+using Polymer.Core.Input;
 using Polymer.UI.Routing;
 using UnityEngine;
+using VContainer;
 
 namespace Polymer.UI.GraphPage
 {
@@ -13,11 +15,14 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private NodesRenderer nodesRenderer;
         [SerializeField] private LinksRenderer linksRenderer;
         [SerializeField] private GraphSettings settings;
+        [SerializeField] private Scaler scaler;
         [SerializeField] private bool isGeometric = true;
         
         // [SerializeField] [ReadOnly] private NodeComponent _selected;
 
         public ForceDirectedLayout Layout { get; private set; }
+
+        [Inject] private InputManager _inputManager;
         
         private NodesRenderer _nodesRenderer;
         private LinksRenderer _linksRenderer;
@@ -31,9 +36,26 @@ namespace Polymer.UI.GraphPage
             
             _nodesRenderer = Instantiate(nodesRenderer);
             _nodesRenderer.SetNodes(factory.Nodes);
-
+            
             _linksRenderer = Instantiate(linksRenderer);
             _linksRenderer.SetLinks(factory.Connections);
+
+            _inputManager.OnScrollWheel += UpdateScale;
+            scaler.OnScaleChanged += ApplyScale;
+        }
+
+        private void UpdateScale(Vector2 delta)
+        {
+            Debug.Log(delta);
+            scaler.AdjustTargetScale(delta.y);
+        }
+        
+        private void ApplyScale(float value)
+        {
+            _linksRenderer.Scale = value;
+            _nodesRenderer.Scale = value;
+            _linksRenderer.RecalculateMesh();
+            _nodesRenderer.RecalculateMesh();
         }
 
         private void Update()

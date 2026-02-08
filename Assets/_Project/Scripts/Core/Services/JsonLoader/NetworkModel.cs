@@ -6,7 +6,7 @@ namespace Polymer.Services.JsonLoader
     [Serializable]
     public class NetworkModel
     {
-        public List<Device> devices;
-        public List<Connection> connections;
+        public List<JsonTestDevice> devices;
+        public List<JsonTestConnection> connections;
     }
 }

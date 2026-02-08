@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 8702187591903853132}
   - component: {fileID: 2329843997727704188}
   - component: {fileID: 4733686572712153979}
+  - component: {fileID: 3839895472601377639}
   m_Layer: 5
   m_Name: Graph
   m_TagString: Untagged
@@ -130,9 +131,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layoutPage: {fileID: 2329843997727704188}
   container: {fileID: 6771356685698472314}
-  nodeWeighPerEdge: 0.2
+  nodeWeighPerEdge: 1
   nodeRadiusPerEdge: 0.2
-  creationGap: 0.05
+  creationGap: 0.01
 --- !u!114 &2329843997727704188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,7 +150,8 @@ MonoBehaviour:
   nodesRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
   linksRenderer: {fileID: 8718519676847808330, guid: 6ce0ec869e3adb5498c2525486d4ca4a, type: 3}
   settings: {fileID: 3443341597787796938}
-  mode: 0
+  scaler: {fileID: 3839895472601377639}
+  isGeometric: 1
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -158,3 +160,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918683683182912811}
   m_CullTransparentMesh: 1
+--- !u!114 &3839895472601377639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918683683182912811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c5311fae538495daad3d67799b39827, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialScale: 0.006
+  maxScale: 0.3
+  minScale: 0.0001
+  smoothTime: 0.2
+  intensity: 0.1
