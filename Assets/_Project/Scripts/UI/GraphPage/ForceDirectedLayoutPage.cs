@@ -2,6 +2,7 @@ using FDLayout;
 using Polymer.Core.Input;
 using Polymer.UI.Routing;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using VContainer;
 
 namespace Polymer.UI.GraphPage
@@ -27,9 +28,11 @@ namespace Polymer.UI.GraphPage
         private NodesRenderer _nodesRenderer;
         private LinksRenderer _linksRenderer;
         
+        
+        
         private void Start()
         {
-            StartCoroutine(factory.CreateNodes());
+            factory.CreateNodes();
             
             Layout = new ForceDirectedLayout(factory.Nodes, factory.Connections, isGeometric: isGeometric);
             settings.Init(Layout);
@@ -44,6 +47,16 @@ namespace Polymer.UI.GraphPage
             scaler.OnScaleChanged += ApplyScale;
         }
 
+        public void StartAnimation()
+        {
+            factory.CreateNodes();
+        }
+
+        public void Reload()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        
         private void UpdateScale(Vector2 delta)
         {
             Debug.Log(delta);

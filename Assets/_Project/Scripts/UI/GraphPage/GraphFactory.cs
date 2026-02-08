@@ -19,14 +19,27 @@ namespace Polymer.UI.GraphPage
         public List<Node> Nodes { get; } = new();
         public List<(Node a, Node b)> Connections { get; } = new();
         
-        [Inject] private ApplicationData _appData; 
-        
-        public IEnumerator CreateNodes()
+        [Inject] private ApplicationData _appData;
+
+        private Coroutine _creating;
+
+        public void CreateNodes()
         {
-            yield return new WaitWhile(() => !_appData.Loaded);
-            
             Nodes.Clear();
             Connections.Clear();
+            
+            if (_creating != null)
+            {
+                StopCoroutine(_creating);
+                _creating = null;
+            }
+
+            _creating = StartCoroutine(Create());
+        }
+        
+        private IEnumerator Create()
+        {
+            yield return new WaitWhile(() => !_appData.Loaded);
             
             foreach (var device in _appData.Devices)
             {
