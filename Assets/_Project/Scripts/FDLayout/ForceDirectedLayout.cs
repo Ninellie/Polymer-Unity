@@ -22,6 +22,7 @@ namespace FDLayout
         public float SpeedMultiplier { get; set; }
         public float CellSize { get; set; }
         public float DominantRange { get; set; }
+        public float TangentialStrength { get; set; }
         public bool IsGeometric { get; set; }
         
         public bool IsSimulated { get; set; }
@@ -45,6 +46,7 @@ namespace FDLayout
             float speedMultiplier = 1,
             float cellSize = 40,
             float dominantRange = 5,
+            float tangentialStrength = 15f,
             bool isGeometric = true)
         {
             Nodes = nodes;
@@ -60,6 +62,7 @@ namespace FDLayout
             SpeedMultiplier = speedMultiplier;
             CellSize = cellSize;
             DominantRange = dominantRange;
+            TangentialStrength = tangentialStrength;
             IsGeometric = isGeometric;
         }
         
@@ -101,7 +104,7 @@ namespace FDLayout
 
                         // Сила тем выше, чем меньше угол (чем ближе они друг к другу на дуге)
                         // Можно использовать (1 + dot) как множитель (растет от 0 до 2, когда угол мал)
-                        var strength = (1f + dot) * 20f;
+                        var strength = (1f + dot) * TangentialStrength;
 
                         if (!a.IsFixed) a.Force += tangentA * strength;
                         
