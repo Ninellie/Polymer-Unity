@@ -6,7 +6,7 @@ namespace FDLayout
     public class Node
     {
         public int Id;
-        public float Weight;
+        public float Weight => Links.Count + 1;
         public bool IsFixed;
         public Vector2 Position;
         public Vector2 Velocity;

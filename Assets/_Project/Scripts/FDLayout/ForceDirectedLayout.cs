@@ -23,6 +23,7 @@ namespace FDLayout
         public float CellSize { get; set; }
         public float DominantRange { get; set; }
         public float TangentialStrength { get; set; }
+        public float MassScale { get; set; }
         public bool IsGeometric { get; set; }
         
         public bool IsSimulated { get; set; }
@@ -47,6 +48,7 @@ namespace FDLayout
             float cellSize = 40,
             float dominantRange = 5,
             float tangentialStrength = 15f,
+            float massScale = 4f,
             bool isGeometric = true)
         {
             Nodes = nodes;
@@ -63,6 +65,7 @@ namespace FDLayout
             CellSize = cellSize;
             DominantRange = dominantRange;
             TangentialStrength = tangentialStrength;
+            MassScale = massScale;
             IsGeometric = isGeometric;
         }
         
@@ -106,13 +109,14 @@ namespace FDLayout
                         // Можно использовать (1 + dot) как множитель (растет от 0 до 2, когда угол мал)
                         var strength = (1f + dot) * TangentialStrength;
 
-                        if (!a.IsFixed) a.Force += tangentA * strength;
-                        
-                        // Для узла B тангент будет зеркальным
+                        var forceA = tangentA * strength;
                         var tangentB = new Vector2(-cb.y, cb.x).normalized;
                         if (Vector2.Dot(tangentB, ca) > 0) tangentB = -tangentB;
-                        
-                        if (!b.IsFixed) b.Force += tangentB * strength;
+                        var forceB = tangentB * strength;
+
+                        if (!a.IsFixed) a.Force += forceA;
+                        if (!b.IsFixed) b.Force += forceB;
+                        if (!center.IsFixed) center.Force -= forceA + forceB;
                     }
                 }
             }
@@ -208,7 +212,9 @@ namespace FDLayout
                 var distance = delta.magnitude;
                 if (distance < 0.0001f) continue;
                 
-                var targetDistance = LinkDistance + connection.a.Radius + connection.b.Radius;
+                var targetDistance = LinkDistance
+                    + connection.a.Radius + connection.b.Radius
+                    + (connection.a.Weight + connection.b.Weight) * MassScale;
                 var displacement = distance - targetDistance;
         
                 var transition = (delta / distance) * (displacement * LinkStrength);

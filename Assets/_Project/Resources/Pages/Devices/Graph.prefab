@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 3, y: 0}
+  m_AnchoredPosition: {x: -5, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &4197264189690364482
 MonoBehaviour:
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1869366223595989653}
-  prefab: {fileID: -3453306308391909844, guid: abff044cb3b748643b69f20d3b27814c, type: 3}
+  prefab: {fileID: 2082749747985197545, guid: 51c26e60dc1b624428ce55cb1a524611, type: 3}
 --- !u!1 &918683683182912811
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,7 +133,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layoutPage: {fileID: 2329843997727704188}
   container: {fileID: 6771356685698472314}
-  nodeWeighPerEdge: 1
   nodeRadiusPerEdge: 0.2
   creationGap: 0.01
 --- !u!114 &2329843997727704188
