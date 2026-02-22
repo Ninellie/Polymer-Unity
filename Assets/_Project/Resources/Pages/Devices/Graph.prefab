@@ -178,6 +178,7 @@ MonoBehaviour:
   minScale: 0.0001
   smoothTime: 0.2
   intensity: 0.1
+  inertiaDamping: 7
 --- !u!1 &2931491878064216385
 GameObject:
   m_ObjectHideFlags: 0

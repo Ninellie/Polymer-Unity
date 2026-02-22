@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using FDLayout;
 using UnityEngine;
 
@@ -18,6 +18,8 @@ namespace Polymer.UI.GraphPage
             get => scale;
             set => scale = value;
         }
+
+        public Vector2 Offset { get; set; }
 
         private List<(Node a, Node b)> _links;
         private Mesh _mesh;
@@ -73,7 +75,9 @@ namespace Polymer.UI.GraphPage
             for (var i = 0; i < linkCount; i++)
             {
                 var link = _links[i];
-                UpdateLinkGeometry(i, link.a.Position * Scale, link.b.Position * Scale, link.a.Color, link.b.Color);
+                var posA = (Vector3)(link.a.Position * Scale + Offset);
+                var posB = (Vector3)(link.b.Position * Scale + Offset);
+                UpdateLinkGeometry(i, posA, posB, link.a.Color, link.b.Color);
             }
 
             _mesh.vertices = _vertices;

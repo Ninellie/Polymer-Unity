@@ -44,7 +44,10 @@ namespace Polymer.UI.GraphPage
             _linksRenderer.SetLinks(factory.Connections);
 
             _inputManager.OnScrollWheel += UpdateScale;
+            _inputManager.OnDrag += UpdateOffset;
+            _inputManager.OnDragEnd += OnDragEnd;
             scaler.OnScaleChanged += ApplyScale;
+            scaler.OnOffsetChanged += ApplyOffset;
         }
 
         public void StartAnimation()
@@ -59,8 +62,20 @@ namespace Polymer.UI.GraphPage
         
         private void UpdateScale(Vector2 delta)
         {
-            Debug.Log(delta);
-            scaler.AdjustTargetScale(delta.y);
+            var cursorWorld = (Vector2)Camera.main.ScreenToWorldPoint(UnityEngine.InputSystem.Pointer.current.position.ReadValue());
+            scaler.AdjustTargetScale(delta.y, cursorWorld);
+        }
+
+        private void UpdateOffset(Vector2 screenDelta)
+        {
+            var cam = Camera.main;
+            var worldDelta = screenDelta * (2f * cam.orthographicSize / Screen.height);
+            scaler.AdjustOffset(worldDelta);
+        }
+
+        private void OnDragEnd()
+        {
+            scaler.ReleaseInertia();
         }
         
         private void ApplyScale(float value)
@@ -69,6 +84,14 @@ namespace Polymer.UI.GraphPage
             _nodesRenderer.Scale = value;
             _linksRenderer.RecalculateMesh();
             _nodesRenderer.RecalculateMesh();
+        }
+
+        private void ApplyOffset(Vector2 offset)
+        {
+            _nodesRenderer.Offset = offset;
+            _linksRenderer.Offset = offset;
+            _nodesRenderer.RecalculateMesh();
+            _linksRenderer.RecalculateMesh();
         }
 
         private void Update()

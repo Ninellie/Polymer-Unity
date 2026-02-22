@@ -18,6 +18,8 @@ namespace Polymer.UI.GraphPage
             set => scale = value;
         }
 
+        public Vector2 Offset { get; set; }
+
         private List<Node> _nodes;
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -99,7 +101,7 @@ namespace Polymer.UI.GraphPage
             foreach (var node in _nodes)
             {
                 var r = node.Radius * Scale;
-                var pos = node.Position * Scale;
+                var pos = node.Position * Scale + Offset;
 
                 var v = index * 4;
                 _vertices[v] = new Vector3(pos.x - r, pos.y - r, 0);
