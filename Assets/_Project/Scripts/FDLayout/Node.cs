@@ -13,6 +13,7 @@ namespace FDLayout
         public Vector2 Force;
         public float Radius;
         public Color Color;
+        public Color DisplayColor;
         public readonly HashSet<Node> Links = new();
     }
 }

@@ -1,8 +1,11 @@
+using System.Collections.Generic;
 using Core.Models;
+using FDLayout;
 using Polymer.Core.Input;
 using Polymer.Services.JsonLoader;
 using Polymer.Services.NetBoxLoader;
 using Polymer.UI;
+using Polymer.UI.GraphPage;
 using Polymer.UI.Routing;
 using VContainer;
 using VContainer.Unity;
@@ -16,6 +19,9 @@ namespace Polymer
         [SerializeField] private Transform pageRoot;
         [SerializeField] private bool useJsonFile;
         [SerializeField] private TextAsset jsonFile;
+        
+        [SerializeField] private NodesRenderer nodesRendererPrefab;
+        [SerializeField] private LinksRenderer linksRendererPrefab;
         
         protected override void Configure(IContainerBuilder builder)
         {
@@ -34,6 +40,20 @@ namespace Polymer
             }
             
             // Graph page
+            var nodes = new List<Node>();
+            var links = new List<(Node a, Node b)>();
+            var layout = new ForceDirectedLayout(nodes, links, isGeometric: true);
+            builder.RegisterInstance(Camera.main);
+            builder.RegisterInstance(nodes);
+            builder.RegisterInstance(links);
+            builder.RegisterInstance(layout);
+            builder.RegisterEntryPoint<GraphRendererInjector>();
+            var graphRenderer = new GameObject();
+            graphRenderer.name = "Graph Renderer";
+            var nodesRenderer = Instantiate(nodesRendererPrefab, graphRenderer.transform);
+            builder.RegisterInstance(nodesRenderer);
+            var linksRenderer = Instantiate(linksRendererPrefab, graphRenderer.transform);
+            builder.RegisterInstance(linksRenderer);
             
             // Page routing
             var routeTable = CreateRouteTable();

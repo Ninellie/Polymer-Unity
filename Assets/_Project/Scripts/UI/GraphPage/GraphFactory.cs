@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,7 @@ using Core.Models;
 using FDLayout;
 using UnityEngine;
 using VContainer;
+using Random = UnityEngine.Random;
 
 namespace Polymer.UI.GraphPage
 {
@@ -15,17 +17,22 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private float nodeRadiusPerEdge = 1;
         [SerializeField] private float creationGap = 0.1f;
 
-        public List<Node> Nodes { get; } = new();
-        public List<(Node a, Node b)> Connections { get; } = new();
-        
         [Inject] private ApplicationData _appData;
+        [Inject] private ForceDirectedLayout _layout;
+        [Inject] private List<Node> _nodes;
+        [Inject] private List<(Node a, Node b)> _connections;
 
         private Coroutine _creating;
-
-        public void CreateNodes()
+        
+        private void Start()
         {
-            Nodes.Clear();
-            Connections.Clear();
+            RecreateNodes();
+        }
+
+        public void RecreateNodes()
+        {
+            _nodes.Clear();
+            _connections.Clear();
             
             if (_creating != null)
             {
@@ -51,17 +58,18 @@ namespace Polymer.UI.GraphPage
                 if (ColorUtility.TryParseHtmlString(device.Role.Color, out var color))
                 {
                     node.Color = color;
+                    node.DisplayColor = color;
                 }
                 
-                Nodes.Add(node);
-                layoutPage.Layout.Start();
+                _nodes.Add(node);
+                _layout.Start();
             }
             
             foreach (var connection in _appData.Cables)
             { 
                 yield return new WaitForSeconds(creationGap);
-                var a = Nodes.First(node => node.Id == connection.FromDeviceId);
-                var b = Nodes.First(node => node.Id == connection.ToDeviceId);
+                var a = _nodes.First(node => node.Id == connection.FromDeviceId);
+                var b = _nodes.First(node => node.Id == connection.ToDeviceId);
                 
                 a.Links.Add(b);
                 b.Links.Add(a);
@@ -69,9 +77,9 @@ namespace Polymer.UI.GraphPage
                 a.Radius += nodeRadiusPerEdge;
                 b.Radius += nodeRadiusPerEdge;
 
-                Connections.Add((a, b));
+                _connections.Add((a, b));
                 
-                layoutPage.Layout.Start();
+                _layout.Start();
             }
         }
     }

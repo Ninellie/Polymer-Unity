@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: 2329843997727704188}
   - component: {fileID: 4733686572712153979}
   - component: {fileID: 3839895472601377639}
+  - component: {fileID: 3511092025051009315}
   m_Layer: 5
   m_Name: Graph
   m_TagString: Untagged
@@ -147,11 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c39fd1244eed4a1682d3c6298df27dd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  factory: {fileID: 8702187591903853132}
-  nodesRenderer: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
-  linksRenderer: {fileID: 8718519676847808330, guid: 6ce0ec869e3adb5498c2525486d4ca4a, type: 3}
-  settings: {fileID: 3443341597787796938}
-  scaler: {fileID: 3839895472601377639}
   isGeometric: 1
 --- !u!222 &4733686572712153979
 CanvasRenderer:
@@ -179,6 +175,22 @@ MonoBehaviour:
   smoothTime: 0.2
   intensity: 0.1
   inertiaDamping: 7
+--- !u!114 &3511092025051009315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918683683182912811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ee9525d58e6499d8bbaf175c5968dca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  factory: {fileID: 8702187591903853132}
+  graphScaler: {fileID: 3839895472601377639}
+  highlightColor: {r: 1, g: 1, b: 1, a: 1}
+  fadeAlpha: 0.15
 --- !u!1 &2931491878064216385
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,9 +417,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2329843997727704188}
-        m_TargetAssemblyTypeName: Polymer.UI.GraphPage.ForceDirectedLayoutPage, Assembly-CSharp
-        m_MethodName: StartAnimation
+      - m_Target: {fileID: 8702187591903853132}
+        m_TargetAssemblyTypeName: Polymer.UI.GraphPage.GraphFactory, Assembly-CSharp
+        m_MethodName: RecreateNodes
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FDLayout;
 using UnityEngine;
+using VContainer;
 
 namespace Polymer.UI.GraphPage
 {
@@ -20,8 +21,11 @@ namespace Polymer.UI.GraphPage
         }
 
         public Vector2 Offset { get; set; }
+        
+        [Inject] private List<(Node a, Node b)> _links;
+        private Node _hoveredNode;
+        private float _fadedAlpha = 0.15f;
 
-        private List<(Node a, Node b)> _links;
         private Mesh _mesh;
         private Vector3[] _vertices;
         private int[] _indices;
@@ -77,7 +81,16 @@ namespace Polymer.UI.GraphPage
                 var link = _links[i];
                 var posA = (Vector3)(link.a.Position * Scale + Offset);
                 var posB = (Vector3)(link.b.Position * Scale + Offset);
-                UpdateLinkGeometry(i, posA, posB, link.a.Color, link.b.Color);
+                var colorA = link.a.DisplayColor;
+                var colorB = link.b.DisplayColor;
+
+                if (_hoveredNode != null && link.a != _hoveredNode && link.b != _hoveredNode)
+                {
+                    colorA.a = _fadedAlpha;
+                    colorB.a = _fadedAlpha;
+                }
+
+                UpdateLinkGeometry(i, posA, posB, colorA, colorB);
             }
 
             _mesh.vertices = _vertices;
@@ -96,14 +109,15 @@ namespace Polymer.UI.GraphPage
             _vertices[v + 2] = end - normal;
             _vertices[v + 3] = start - normal;
 
-            // Запись цвета (можно делать градиент между узлами)
+            // Запись цвета (градиент между узлами)
             _colors[v] = _colors[v + 3] = colorA;
             _colors[v + 1] = _colors[v + 2] = colorB;
         }
 
-        public void SetLinks(List<(Node a, Node b)> links)
+        public void SetHoverContext(Node hoveredNode, float fadedAlpha)
         {
-            _links = links;
+            _hoveredNode = hoveredNode;
+            _fadedAlpha = fadedAlpha;
         }
     }
 }

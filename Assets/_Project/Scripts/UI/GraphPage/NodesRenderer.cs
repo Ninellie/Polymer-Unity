@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FDLayout;
 using UnityEngine;
+using VContainer;
 
 namespace Polymer.UI.GraphPage
 {
@@ -20,7 +21,8 @@ namespace Polymer.UI.GraphPage
 
         public Vector2 Offset { get; set; }
 
-        private List<Node> _nodes;
+        [Inject] private List<Node> _nodes;
+        
         private Mesh _mesh;
         private Vector3[] _vertices;
         private int[] _indices;
@@ -96,7 +98,6 @@ namespace Polymer.UI.GraphPage
                 _lastNodeCount = nodeCount;
             }
 
-            // Обновляем позиции
             var index = 0;
             foreach (var node in _nodes)
             {
@@ -109,16 +110,17 @@ namespace Polymer.UI.GraphPage
                 _vertices[v + 2] = new Vector3(pos.x + r, pos.y + r, 0);
                 _vertices[v + 3] = new Vector3(pos.x + r, pos.y - r, 0);
 
+                _colors[v] = node.DisplayColor;
+                _colors[v + 1] = node.DisplayColor;
+                _colors[v + 2] = node.DisplayColor;
+                _colors[v + 3] = node.DisplayColor;
+
                 index++;
             }
 
             _mesh.vertices = _vertices;
+            _mesh.colors = _colors;
             _mesh.RecalculateBounds();
-        }
-
-        public void SetNodes(List<Node> nodes)
-        {
-            _nodes = nodes;
         }
     }
 }
