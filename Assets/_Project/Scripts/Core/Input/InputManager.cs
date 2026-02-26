@@ -10,6 +10,8 @@ namespace Polymer.Core.Input
         public event Action<Vector2> OnScrollWheel;
         public event Action<Vector2> OnDrag;
         public event Action OnDragEnd;
+        public event Action OnPrimaryDown;
+        public event Action OnPrimaryUp;
 
         private InputActionMap _uiMap;
         private bool _isDragging;
@@ -28,6 +30,10 @@ namespace Polymer.Core.Input
 
             var point = _uiMap.FindAction("Point");
             point.performed += context => UpdateDrag(context.ReadValue<Vector2>());
+
+            var click = _uiMap.FindAction("Click");
+            click.started += _ => OnPrimaryDown?.Invoke();
+            click.canceled += _ => OnPrimaryUp?.Invoke();
             
             _uiMap.Enable();
         }

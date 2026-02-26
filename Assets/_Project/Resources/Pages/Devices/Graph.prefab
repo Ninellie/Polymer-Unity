@@ -149,6 +149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGeometric: 1
+  graphScaler: {fileID: 3839895472601377639}
+  hoverHighlighter: {fileID: 3511092025051009315}
 --- !u!222 &4733686572712153979
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -187,10 +189,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ee9525d58e6499d8bbaf175c5968dca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  factory: {fileID: 8702187591903853132}
   graphScaler: {fileID: 3839895472601377639}
   highlightColor: {r: 1, g: 1, b: 1, a: 1}
   fadeAlpha: 0.15
+  transitionDuration: 0.2
 --- !u!1 &2931491878064216385
 GameObject:
   m_ObjectHideFlags: 0

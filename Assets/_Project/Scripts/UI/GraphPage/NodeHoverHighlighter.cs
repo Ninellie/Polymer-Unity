@@ -19,8 +19,12 @@ namespace Polymer.UI.GraphPage
         [Inject] private Camera _mainCamera;
 
         private Node _hoveredNode;
+        private bool _isHoverLocked;
+        private Node _lockedNode;
         private readonly Dictionary<Node, ColorTransition> _transitions = new();
         private readonly List<Node> _transitionNodes = new();
+
+        public Node HoveredNode => _hoveredNode;
 
         private struct ColorTransition
         {
@@ -42,6 +46,17 @@ namespace Polymer.UI.GraphPage
         
         private bool UpdateHoveredNode()
         {
+            if (_isHoverLocked)
+            {
+                if (_lockedNode == _hoveredNode) return false;
+
+                ResetHighlight();
+                _hoveredNode = _lockedNode;
+                if (_hoveredNode != null) ApplyHighlight();
+                _linksRenderer.SetHoverContext(_hoveredNode, fadeAlpha);
+                return true;
+            }
+
             var screenPos = Pointer.current.position.ReadValue();
             var worldPos = (Vector2)_mainCamera.ScreenToWorldPoint(screenPos);
             var graphPos = (worldPos - graphScaler.Offset) / graphScaler.Scale;
@@ -67,6 +82,18 @@ namespace Polymer.UI.GraphPage
             if (_hoveredNode != null) ApplyHighlight();
             _linksRenderer.SetHoverContext(_hoveredNode, fadeAlpha);
             return true;
+        }
+
+        public void LockHover(Node node)
+        {
+            _isHoverLocked = true;
+            _lockedNode = node;
+        }
+
+        public void UnlockHover()
+        {
+            _isHoverLocked = false;
+            _lockedNode = null;
         }
 
         private void ApplyHighlight()
