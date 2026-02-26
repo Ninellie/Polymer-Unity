@@ -14,6 +14,7 @@ namespace FDLayout
         public float Radius;
         public Color Color;
         public Color DisplayColor;
+        public Color TargetDisplayColor;
         public readonly HashSet<Node> Links = new();
     }
 }

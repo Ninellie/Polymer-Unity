@@ -11,6 +11,7 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private Material linkMaterial;
         [SerializeField] private float thickness;
         [SerializeField] private float scale;
+        [SerializeField] private float linkFadeDuration = 0.2f;
 
         public bool IsRendering { get; set; } = true;
 
@@ -25,6 +26,11 @@ namespace Polymer.UI.GraphPage
         [Inject] private List<(Node a, Node b)> _links;
         private Node _hoveredNode;
         private float _fadedAlpha = 0.15f;
+        private float[] _linkAlphaCurrent;
+        private float[] _linkAlphaStart;
+        private float[] _linkAlphaTarget;
+        private float[] _linkAlphaElapsed;
+        private bool[] _linkAlphaAnimating;
 
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -62,6 +68,8 @@ namespace Polymer.UI.GraphPage
                 _vertices = new Vector3[linkCount * 4];
                 _indices = new int[linkCount * 6];
                 _colors = new Color[linkCount * 4];
+                EnsureLinkAlphaState(linkCount);
+                RebuildLinkAlphaTargets();
                 
                 for (var i = 0; i < linkCount; i++)
                 {
@@ -83,12 +91,9 @@ namespace Polymer.UI.GraphPage
                 var posB = (Vector3)(link.b.Position * Scale + Offset);
                 var colorA = link.a.DisplayColor;
                 var colorB = link.b.DisplayColor;
-
-                if (_hoveredNode != null && link.a != _hoveredNode && link.b != _hoveredNode)
-                {
-                    colorA.a = _fadedAlpha;
-                    colorB.a = _fadedAlpha;
-                }
+                var alpha = UpdateLinkAlpha(i);
+                colorA.a *= alpha;
+                colorB.a *= alpha;
 
                 UpdateLinkGeometry(i, posA, posB, colorA, colorB);
             }
@@ -118,6 +123,72 @@ namespace Polymer.UI.GraphPage
         {
             _hoveredNode = hoveredNode;
             _fadedAlpha = fadedAlpha;
+            RebuildLinkAlphaTargets();
+        }
+
+        private void EnsureLinkAlphaState(int linkCount)
+        {
+            if (_linkAlphaCurrent != null && _linkAlphaCurrent.Length == linkCount) return;
+
+            _linkAlphaCurrent = new float[linkCount];
+            _linkAlphaStart = new float[linkCount];
+            _linkAlphaTarget = new float[linkCount];
+            _linkAlphaElapsed = new float[linkCount];
+            _linkAlphaAnimating = new bool[linkCount];
+
+            for (var i = 0; i < linkCount; i++)
+            {
+                _linkAlphaCurrent[i] = 1f;
+                _linkAlphaStart[i] = 1f;
+                _linkAlphaTarget[i] = 1f;
+                _linkAlphaElapsed[i] = 0f;
+                _linkAlphaAnimating[i] = false;
+            }
+        }
+
+        private void RebuildLinkAlphaTargets()
+        {
+            var linkCount = _links.Count;
+            EnsureLinkAlphaState(linkCount);
+
+            for (var i = 0; i < linkCount; i++)
+            {
+                var link = _links[i];
+                var targetAlpha = _hoveredNode != null && link.a != _hoveredNode && link.b != _hoveredNode
+                    ? _fadedAlpha
+                    : 1f;
+
+                if (Mathf.Abs(_linkAlphaCurrent[i] - targetAlpha) < 0.001f)
+                {
+                    _linkAlphaCurrent[i] = targetAlpha;
+                    _linkAlphaTarget[i] = targetAlpha;
+                    _linkAlphaAnimating[i] = false;
+                    continue;
+                }
+
+                _linkAlphaStart[i] = _linkAlphaCurrent[i];
+                _linkAlphaTarget[i] = targetAlpha;
+                _linkAlphaElapsed[i] = 0f;
+                _linkAlphaAnimating[i] = true;
+            }
+        }
+
+        private float UpdateLinkAlpha(int index)
+        {
+            if (!_linkAlphaAnimating[index]) return _linkAlphaCurrent[index];
+
+            var duration = Mathf.Max(linkFadeDuration, 0.0001f);
+            _linkAlphaElapsed[index] += Time.deltaTime;
+            var t = Mathf.Clamp01(_linkAlphaElapsed[index] / duration);
+            _linkAlphaCurrent[index] = Mathf.Lerp(_linkAlphaStart[index], _linkAlphaTarget[index], t);
+
+            if (t >= 1f)
+            {
+                _linkAlphaCurrent[index] = _linkAlphaTarget[index];
+                _linkAlphaAnimating[index] = false;
+            }
+
+            return _linkAlphaCurrent[index];
         }
     }
 }

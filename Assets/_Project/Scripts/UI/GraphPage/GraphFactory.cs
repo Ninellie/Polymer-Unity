@@ -59,6 +59,7 @@ namespace Polymer.UI.GraphPage
                 {
                     node.Color = color;
                     node.DisplayColor = color;
+                    node.TargetDisplayColor = color;
                 }
                 
                 _nodes.Add(node);
