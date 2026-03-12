@@ -46,6 +46,13 @@ namespace Polymer.UI.GraphPage
             _inputManager.OnDragEnd += OnDragEnd;
         }
 
+        private void OnDestroy()
+        {
+            _inputManager.OnScrollWheel -= UpdateScale;
+            _inputManager.OnDrag -= UpdateOffset;
+            _inputManager.OnDragEnd -= OnDragEnd;
+        }
+
         private void Update()
         {
             var changed = false;
