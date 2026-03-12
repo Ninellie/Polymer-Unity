@@ -46,6 +46,7 @@ namespace Polymer.UI.GraphPage
         private IEnumerator Create()
         {
             yield return new WaitWhile(() => !_appData.Loaded);
+            var uniqueConnections = new HashSet<(int minId, int maxId)>();
             
             foreach (var device in _appData.Devices)
             {
@@ -78,6 +79,10 @@ namespace Polymer.UI.GraphPage
                 a.Radius += nodeRadiusPerEdge;
                 b.Radius += nodeRadiusPerEdge;
 
+                var minId = Mathf.Min(a.Id, b.Id);
+                var maxId = Mathf.Max(a.Id, b.Id);
+                if (!uniqueConnections.Add((minId, maxId))) continue;
+                
                 _connections.Add((a, b));
                 
                 _layout.Start();
