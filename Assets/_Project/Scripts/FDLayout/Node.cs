@@ -12,8 +12,6 @@ namespace FDLayout
         public Vector2 Velocity;
         public Vector2 Force;
         public float BaseRadius;
-        public float RadiusPerEdge;
-        public float Radius => BaseRadius + Links.Count * RadiusPerEdge;
         public Color Color;
         public Color DisplayColor;
         public Color TargetDisplayColor;

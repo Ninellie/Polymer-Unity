@@ -67,7 +67,7 @@ namespace Polymer.UI.GraphPage
             foreach (var node in _layout.Nodes)
             {
                 var distSqr = (node.Position - graphPos).sqrMagnitude;
-                var r = node.Radius * _layout.RadiusScale;
+                var r = _layout.Radius(node);
                 var radiusSqr = r * r;
                 if (distSqr < radiusSqr && distSqr < closestDistSqr)
                 {

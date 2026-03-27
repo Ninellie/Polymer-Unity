@@ -134,7 +134,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layoutPage: {fileID: 2329843997727704188}
   container: {fileID: 6771356685698472314}
-  nodeRadiusPerEdge: 0.2
   creationGap: 0.01
 --- !u!114 &2329843997727704188
 MonoBehaviour:

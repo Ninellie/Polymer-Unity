@@ -885,7 +885,7 @@ MonoBehaviour:
   autoInjectGameObjects: []
   pageRoutingSettings: {fileID: 11400000, guid: b0e2790c4fa6c1940b4e8d3491653290, type: 2}
   pageRoot: {fileID: 830225400}
-  useJsonFile: 1
+  useJsonFile: 0
   jsonFile: {fileID: 4900000, guid: 69b7bab8162f4b4f85a20382ac0c5691, type: 3}
   nodesRendererPrefab: {fileID: 2538441823885837151, guid: ec86abe11ab9fd74eb7e31e8c369237e, type: 3}
   linksRendererPrefab: {fileID: 8718519676847808330, guid: 6ce0ec869e3adb5498c2525486d4ca4a, type: 3}

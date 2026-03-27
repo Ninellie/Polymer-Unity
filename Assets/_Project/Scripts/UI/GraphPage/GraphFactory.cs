@@ -15,7 +15,6 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private ForceDirectedLayoutPage layoutPage;
         [SerializeField] private RectTransform container;
         [SerializeField] private float baseRadius = 15f;
-        [SerializeField] private float nodeRadiusPerEdge = 1f;
         [SerializeField] private float creationGap = 0.1f;
 
         [Inject] private ApplicationData _appData;
@@ -48,7 +47,7 @@ namespace Polymer.UI.GraphPage
         {
             yield return new WaitWhile(() => !_appData.Loaded);
             var uniqueConnections = new HashSet<(int minId, int maxId)>();
-            
+
             foreach (var device in _appData.Devices)
             {
                 yield return new WaitForSeconds(creationGap);
@@ -56,7 +55,6 @@ namespace Polymer.UI.GraphPage
                 node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
                 node.Id = device.Id;
                 node.BaseRadius = baseRadius;
-                node.RadiusPerEdge = nodeRadiusPerEdge;
 
                 if (ColorUtility.TryParseHtmlString(device.Role.Color, out var color))
                 {

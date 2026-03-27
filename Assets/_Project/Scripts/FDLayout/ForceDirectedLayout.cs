@@ -25,6 +25,7 @@ namespace FDLayout
         public float TangentialStrength { get; set; }
         public float MassScale { get; set; }
         public float RadiusScale { get; set; }
+        public float RadiusPerEdge { get; set; }
         public bool IsGeometric { get; set; }
         
         public bool IsSimulated { get; set; }
@@ -51,6 +52,7 @@ namespace FDLayout
             float tangentialStrength = 15f,
             float massScale = 4f,
             float radiusScale = 1f,
+            float radiusPerEdge = 1f,
             bool isGeometric = true)
         {
             Nodes = nodes;
@@ -69,6 +71,7 @@ namespace FDLayout
             TangentialStrength = tangentialStrength;
             MassScale = massScale;
             RadiusScale = radiusScale;
+            RadiusPerEdge = radiusPerEdge;
             IsGeometric = isGeometric;
         }
         
@@ -216,7 +219,7 @@ namespace FDLayout
                 if (distance < 0.0001f) continue;
                 
                 var targetDistance = LinkDistance
-                    + ScaledRadius(connection.a) + ScaledRadius(connection.b)
+                    + Radius(connection.a) + Radius(connection.b)
                     + (connection.a.Weight + connection.b.Weight) * MassScale;
                 var displacement = distance - targetDistance;
         
@@ -301,7 +304,7 @@ namespace FDLayout
                             var dir = node.Position - other.Position;
                             var distSqr = dir.sqrMagnitude;
 
-                            var currentRange = ScaledRadius(node) + ScaledRadius(other) + DominantRange;
+                            var currentRange = Radius(node) + Radius(other) + DominantRange;
                             var rangeSqr = currentRange * currentRange;
 
                             if (distSqr > rangeSqr || distSqr < 0.0001f) continue;
@@ -330,7 +333,7 @@ namespace FDLayout
             float maxRadius = 0;
             foreach (var node in Nodes)
             {
-                var r = ScaledRadius(node);
+                var r = Radius(node);
                 if (r > maxRadius) maxRadius = r;
             }
             CellSize = Mathf.Max(CellSize, maxRadius * 2f);
@@ -344,6 +347,11 @@ namespace FDLayout
             );
         }
 
-        private float ScaledRadius(Node node) => node.Radius * RadiusScale;
+        public float Radius(Node node)
+        {
+            var fromEdges = node.Links.Count * RadiusPerEdge;
+            var beforeScale = node.BaseRadius + fromEdges;
+            return beforeScale * RadiusScale;
+        }
     }
 }

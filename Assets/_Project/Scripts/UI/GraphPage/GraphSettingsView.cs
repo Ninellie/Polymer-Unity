@@ -20,6 +20,7 @@ namespace Polymer.UI.GraphPage
             Create("Friction", _layout.Friction, 0f, 0.1f, v => { _layout.Friction = v; _layout.Start(); });
             Create("Charge", _layout.Charge, 0f, 5f, v => { _layout.Charge = v; _layout.Start(); });
             Create("Node radius scale", _layout.RadiusScale, 0.1f, 5f, v => { _layout.RadiusScale = v; _layout.Start(); });
+            Create("Node radius per edge", _layout.RadiusPerEdge, 0f, 20f, v => { _layout.RadiusPerEdge = v; _layout.Start(); });
         }
         
         private void Create(string label, float value, float minValue, float maxValue, Action<float> setter)

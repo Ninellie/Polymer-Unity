@@ -100,7 +100,7 @@ namespace Polymer.UI.GraphPage
             var index = 0;
             foreach (var node in _layout.Nodes)
             {
-                var r = node.Radius * _layout.RadiusScale * Scale;
+                var r = _layout.Radius(node) * Scale;
                 var pos = node.Position * Scale + Offset;
 
                 var v = index * 4;
