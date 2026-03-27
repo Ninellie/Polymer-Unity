@@ -13,7 +13,7 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private float fadeAlpha = 0.15f;
         [SerializeField] private float transitionDuration = 0.2f;
         
-        [Inject] private List<Node> _nodes;
+        [Inject] private ForceDirectedLayout _layout;
         [Inject] private NodesRenderer _nodesRenderer;
         [Inject] private LinksRenderer _linksRenderer;
         [Inject] private Camera _mainCamera;
@@ -64,10 +64,11 @@ namespace Polymer.UI.GraphPage
             Node closest = null;
             var closestDistSqr = float.MaxValue;
 
-            foreach (var node in _nodes)
+            foreach (var node in _layout.Nodes)
             {
                 var distSqr = (node.Position - graphPos).sqrMagnitude;
-                var radiusSqr = node.Radius * node.Radius;
+                var r = node.Radius * _layout.RadiusScale;
+                var radiusSqr = r * r;
                 if (distSqr < radiusSqr && distSqr < closestDistSqr)
                 {
                     closest = node;
@@ -98,7 +99,7 @@ namespace Polymer.UI.GraphPage
 
         private void ApplyHighlight()
         {
-            foreach (var node in _nodes)
+            foreach (var node in _layout.Nodes)
             {
                 var faded = node.Color;
                 faded.a = fadeAlpha;
@@ -112,7 +113,7 @@ namespace Polymer.UI.GraphPage
 
         private void ResetHighlight()
         {
-            foreach (var node in _nodes)
+            foreach (var node in _layout.Nodes)
                 SetNodeTargetColor(node, node.Color);
         }
 

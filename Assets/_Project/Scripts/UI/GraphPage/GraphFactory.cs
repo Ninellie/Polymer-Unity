@@ -14,7 +14,8 @@ namespace Polymer.UI.GraphPage
     {
         [SerializeField] private ForceDirectedLayoutPage layoutPage;
         [SerializeField] private RectTransform container;
-        [SerializeField] private float nodeRadiusPerEdge = 1;
+        [SerializeField] private float baseRadius = 15f;
+        [SerializeField] private float nodeRadiusPerEdge = 1f;
         [SerializeField] private float creationGap = 0.1f;
 
         [Inject] private ApplicationData _appData;
@@ -54,8 +55,9 @@ namespace Polymer.UI.GraphPage
                 var node = new Node();
                 node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
                 node.Id = device.Id;
-                node.Radius = 15;
-                
+                node.BaseRadius = baseRadius;
+                node.RadiusPerEdge = nodeRadiusPerEdge;
+
                 if (ColorUtility.TryParseHtmlString(device.Role.Color, out var color))
                 {
                     node.Color = color;
@@ -75,9 +77,6 @@ namespace Polymer.UI.GraphPage
                 
                 a.Links.Add(b);
                 b.Links.Add(a);
-                
-                a.Radius += nodeRadiusPerEdge;
-                b.Radius += nodeRadiusPerEdge;
 
                 var minId = Mathf.Min(a.Id, b.Id);
                 var maxId = Mathf.Max(a.Id, b.Id);

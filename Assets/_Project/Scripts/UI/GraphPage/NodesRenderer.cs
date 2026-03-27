@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using FDLayout;
 using UnityEngine;
 using VContainer;
@@ -21,7 +20,7 @@ namespace Polymer.UI.GraphPage
 
         public Vector2 Offset { get; set; }
 
-        [Inject] private List<Node> _nodes;
+        [Inject] private ForceDirectedLayout _layout;
         
         private Mesh _mesh;
         private Vector3[] _vertices;
@@ -52,7 +51,7 @@ namespace Polymer.UI.GraphPage
 
         public void RecalculateMesh()
         {
-            var nodeCount = _nodes.Count;
+            var nodeCount = _layout.Nodes.Count;
 
             if (nodeCount == 0) return;
             
@@ -64,7 +63,7 @@ namespace Polymer.UI.GraphPage
                 _uvs = new Vector2[nodeCount * 4];
 
                 var i = 0;
-                foreach (var node in _nodes)
+                foreach (var node in _layout.Nodes)
                 {
                     var v = i * 4;
                     var t = i * 6;
@@ -99,9 +98,9 @@ namespace Polymer.UI.GraphPage
             }
 
             var index = 0;
-            foreach (var node in _nodes)
+            foreach (var node in _layout.Nodes)
             {
-                var r = node.Radius * Scale;
+                var r = node.Radius * _layout.RadiusScale * Scale;
                 var pos = node.Position * Scale + Offset;
 
                 var v = index * 4;
