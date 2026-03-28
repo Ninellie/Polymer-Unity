@@ -45,7 +45,13 @@ namespace Polymer.UI.GraphPage
         
         private IEnumerator Create()
         {
-            yield return new WaitWhile(() => !_appData.Loaded);
+            yield return new WaitWhile(() => !_appData.Loaded && string.IsNullOrEmpty(_appData.LoadError));
+            if (!string.IsNullOrEmpty(_appData.LoadError))
+            {
+                Debug.LogError("[GraphFactory] Stopping graph build: " + _appData.LoadError);
+                yield break;
+            }
+
             var uniqueConnections = new HashSet<(int minId, int maxId)>();
 
             foreach (var device in _appData.Devices)
@@ -55,14 +61,7 @@ namespace Polymer.UI.GraphPage
                 node.Position += Random.insideUnitCircle.normalized * Random.Range(100, 500);
                 node.Id = device.Id;
                 node.BaseRadius = baseRadius;
-
-                if (ColorUtility.TryParseHtmlString(device.Role.Color, out var color))
-                {
-                    node.Color = color;
-                    node.DisplayColor = color;
-                    node.TargetDisplayColor = color;
-                }
-                
+                ApplyRoleColor(node, device);
                 _nodes.Add(node);
                 _layout.Start();
             }
@@ -78,12 +77,29 @@ namespace Polymer.UI.GraphPage
 
                 var minId = Mathf.Min(a.Id, b.Id);
                 var maxId = Mathf.Max(a.Id, b.Id);
-                if (!uniqueConnections.Add((minId, maxId))) continue;
-                
+                if (!uniqueConnections.Add((minId, maxId)))
+                {
+                    continue;
+                }
+
                 _connections.Add((a, b));
                 
                 _layout.Start();
             }
+        }
+
+        private static void ApplyRoleColor(Node node, Device device)
+        {
+            var role = device.Role;
+            if (role == null) return;
+
+            if (string.IsNullOrEmpty(role.Color)) return;
+
+            if (!ColorUtility.TryParseHtmlString(role.Color, out var parsed)) return;
+
+            node.Color = parsed;
+            node.DisplayColor = parsed;
+            node.TargetDisplayColor = parsed;
         }
     }
 }

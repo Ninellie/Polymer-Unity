@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FDLayout;
 using UnityEngine;
@@ -26,6 +27,9 @@ namespace Polymer.UI.GraphPage
 
         public Node HoveredNode => _hoveredNode;
 
+        /// <summary>Fired after <see cref="HoveredNode"/> changes (including to <c>null</c>).</summary>
+        public event Action<Node> HoveredNodeChanged;
+
         private struct ColorTransition
         {
             public Color StartColor;
@@ -48,12 +52,19 @@ namespace Polymer.UI.GraphPage
         {
             if (_isHoverLocked)
             {
-                if (_lockedNode == _hoveredNode) return false;
+                if (_lockedNode == _hoveredNode)
+                {
+                    return false;
+                }
 
                 ResetHighlight();
                 _hoveredNode = _lockedNode;
-                if (_hoveredNode != null) ApplyHighlight();
+                if (_hoveredNode != null)
+                {
+                    ApplyHighlight();
+                }
                 _linksRenderer.SetHoverContext(_hoveredNode, fadeAlpha);
+                HoveredNodeChanged?.Invoke(_hoveredNode);
                 return true;
             }
 
@@ -76,12 +87,19 @@ namespace Polymer.UI.GraphPage
                 }
             }
 
-            if (closest == _hoveredNode) return false;
+            if (closest == _hoveredNode)
+            {
+                return false;
+            }
 
             ResetHighlight();
             _hoveredNode = closest;
-            if (_hoveredNode != null) ApplyHighlight();
+            if (_hoveredNode != null)
+            {
+                ApplyHighlight();
+            }
             _linksRenderer.SetHoverContext(_hoveredNode, fadeAlpha);
+            HoveredNodeChanged?.Invoke(_hoveredNode);
             return true;
         }
 
@@ -108,13 +126,17 @@ namespace Polymer.UI.GraphPage
 
             SetNodeTargetColor(_hoveredNode, highlightColor);
             foreach (var neighbor in _hoveredNode.Links)
+            {
                 SetNodeTargetColor(neighbor, neighbor.Color);
+            }
         }
 
         private void ResetHighlight()
         {
             foreach (var node in _layout.Nodes)
+            {
                 SetNodeTargetColor(node, node.Color);
+            }
         }
 
         private void SetNodeTargetColor(Node node, Color targetColor)
@@ -125,7 +147,10 @@ namespace Polymer.UI.GraphPage
             {
                 node.DisplayColor = targetColor;
                 if (_transitions.Remove(node))
+                {
                     _transitionNodes.Remove(node);
+                }
+
                 return;
             }
 
@@ -147,7 +172,10 @@ namespace Polymer.UI.GraphPage
 
         private bool UpdateTransitions()
         {
-            if (_transitionNodes.Count == 0) return false;
+            if (_transitionNodes.Count == 0)
+            {
+                return false;
+            }
 
             var changed = false;
             var duration = Mathf.Max(transitionDuration, 0.0001f);

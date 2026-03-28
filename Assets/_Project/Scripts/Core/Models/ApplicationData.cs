@@ -12,5 +12,8 @@ namespace Core.Models
         public List<Device> Devices { get; set; } = new();
         public List<Cable> Cables { get; set; } = new();
         public bool Loaded { get; set; }
+
+        /// <summary>Set when a data source fails; empty when load succeeded or not attempted.</summary>
+        public string LoadError { get; set; }
     }
 }

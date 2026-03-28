@@ -1,6 +1,9 @@
+using System.Linq;
+using Core.Models;
 using FDLayout;
 using Polymer.Core.Input;
 using Polymer.UI.Routing;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
@@ -15,24 +18,39 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private bool isGeometric = true;
         [SerializeField] private GraphScaler graphScaler;
         [SerializeField] private NodeHoverHighlighter hoverHighlighter;
+        [SerializeField] private TextMeshProUGUI deviceDetails;
 
         [Inject] private ForceDirectedLayout _layout;
         [Inject] private NodesRenderer _nodesRenderer;
         [Inject] private LinksRenderer _linksRenderer;
         [Inject] private InputManager _inputManager;
         [Inject] private Camera _mainCamera;
-        
+        [Inject] private ApplicationData _appData;
+
+        private GraphDeviceDetailsFormatter _deviceDetailsFormatter;
         private Node _draggedNode;
         private Vector2 _dragOffset;
 
         private void Start()
         {
+            _deviceDetailsFormatter = new GraphDeviceDetailsFormatter(_appData);
+
+            if (hoverHighlighter != null)
+            {
+                hoverHighlighter.HoveredNodeChanged += OnHoveredNodeChanged;
+            }
+
             _inputManager.OnPrimaryDown += StartNodeDrag;
             _inputManager.OnPrimaryUp += StopNodeDrag;
         }
 
         private void OnDestroy()
         {
+            if (hoverHighlighter != null)
+            {
+                hoverHighlighter.HoveredNodeChanged -= OnHoveredNodeChanged;
+            }
+
             _inputManager.OnPrimaryDown -= StartNodeDrag;
             _inputManager.OnPrimaryUp -= StopNodeDrag;
         }
@@ -42,7 +60,7 @@ namespace Polymer.UI.GraphPage
             //todo prefab reload, not scene reload
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-        
+
         private void Update()
         {
             if (_draggedNode != null)
@@ -55,6 +73,20 @@ namespace Polymer.UI.GraphPage
             _layout.IsGeometric = isGeometric;
             _nodesRenderer.IsRendering = _layout.IsColliding;
             _linksRenderer.IsRendering = _layout.IsColliding;
+        }
+
+        private void OnHoveredNodeChanged(Node node)
+        {
+            if (deviceDetails == null) return;
+
+            if (node == null)
+            {
+                deviceDetails.text = string.Empty;
+                return;
+            }
+
+            var device = _appData.Devices.FirstOrDefault(d => d.Id == node.Id);
+            deviceDetails.text = _deviceDetailsFormatter.Build(device, node);
         }
 
         private void StartNodeDrag()
@@ -94,7 +126,7 @@ namespace Polymer.UI.GraphPage
             var cursorWorld = (Vector2)_mainCamera.ScreenToWorldPoint(UnityEngine.InputSystem.Pointer.current.position.ReadValue());
             return (cursorWorld - graphScaler.Offset) / graphScaler.Scale;
         }
-        
+
         public override void OnPageInit(PageArgs args)
         {
         }
