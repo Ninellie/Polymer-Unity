@@ -7,5 +7,7 @@ namespace Polymer.Services.JsonLoader
     {
         public int a;
         public int b;
+        public string a_port;
+        public string b_port;
     }
 }

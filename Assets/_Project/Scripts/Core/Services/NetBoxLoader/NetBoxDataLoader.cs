@@ -125,15 +125,32 @@ namespace Polymer.Services.NetBoxLoader
 
                 if (cablesData.Results != null)
                 {
+                    var skippedCables = 0;
                     foreach (var cable in cablesData.Results)
                     {
-                        var idA = GetDeviceId(cable.ATerminations);
-                        var idB = GetDeviceId(cable.BTerminations);
-
-                        if (idA.HasValue && idB.HasValue)
+                        if (!TryResolveCableEnd(cable.ATerminations, out var devA, out var portA, out var nameA) ||
+                            !TryResolveCableEnd(cable.BTerminations, out var devB, out var portB, out var nameB))
                         {
-                            _appData.Cables.Add(new Cable { FromDeviceId = idA.Value, ToDeviceId = idB.Value });
+                            skippedCables++;
+                            continue;
                         }
+
+                        _appData.Cables.Add(new Cable
+                        {
+                            Id = cable.Id,
+                            FromDeviceId = devA,
+                            ToDeviceId = devB,
+                            FromPortId = portA,
+                            ToPortId = portB,
+                            FromPortName = nameA,
+                            ToPortName = nameB
+                        });
+                    }
+
+                    if (skippedCables > 0)
+                    {
+                        Debug.LogWarning(
+                            $"[NetBoxDataLoader] Skipped {skippedCables} cable(s): could not resolve both endpoints to a device.");
                     }
                 }
 
@@ -163,6 +180,67 @@ namespace Polymer.Services.NetBoxLoader
                 var snippet = json == null ? "null" : json.Substring(0, Math.Min(400, json.Length));
                 throw new InvalidOperationException($"NetBox {endpointLabel}: JSON parse failed. Body starts with: {snippet}", jx);
             }
+        }
+
+        private static bool TryResolveCableEnd(
+            List<TerminationDto> terminations,
+            out int deviceId,
+            out int portId,
+            out string portName)
+        {
+            deviceId = 0;
+            portId = 0;
+            portName = null;
+
+            if (TryGetInterfaceTermination(terminations, out deviceId, out portId, out portName))
+            {
+                return true;
+            }
+
+            var fallbackDevice = GetDeviceId(terminations);
+            if (!fallbackDevice.HasValue)
+            {
+                return false;
+            }
+
+            deviceId = fallbackDevice.Value;
+            return true;
+        }
+
+        private static bool TryGetInterfaceTermination(
+            List<TerminationDto> terminations,
+            out int deviceId,
+            out int portId,
+            out string portName)
+        {
+            deviceId = 0;
+            portId = 0;
+            portName = null;
+
+            if (terminations == null || terminations.Count == 0)
+            {
+                return false;
+            }
+
+            var obj = terminations[0].Object;
+            if (obj?.Device == null || obj.Device.Id == 0)
+            {
+                return false;
+            }
+
+            deviceId = obj.Device.Id;
+            portId = obj.Id;
+            var label = NullIfEmpty(obj.Display ?? obj.Name);
+            if (label != null)
+            {
+                portName = label;
+            }
+            else if (obj.Id != 0)
+            {
+                portName = $"#{obj.Id}";
+            }
+
+            return true;
         }
 
         private static int? GetDeviceId(List<TerminationDto> terminations)
@@ -372,6 +450,7 @@ namespace Polymer.Services.NetBoxLoader
 
         private class CableDto
         {
+            [JsonProperty("id")] public int Id { get; set; }
             [JsonProperty("a_terminations")] public List<TerminationDto> ATerminations { get; set; }
             [JsonProperty("b_terminations")] public List<TerminationDto> BTerminations { get; set; }
         }
@@ -383,12 +462,17 @@ namespace Polymer.Services.NetBoxLoader
 
         private class TermObjectDto
         {
+            [JsonProperty("id")] public int Id { get; set; }
+            [JsonProperty("name")] public string Name { get; set; }
+            [JsonProperty("display")] public string Display { get; set; }
             [JsonProperty("device")] public DeviceRefDto Device { get; set; }
         }
 
         private class DeviceRefDto
         {
             [JsonProperty("id")] public int Id { get; set; }
+            [JsonProperty("name")] public string Name { get; set; }
+            [JsonProperty("display")] public string Display { get; set; }
         }
     }
 }

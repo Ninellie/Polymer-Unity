@@ -58,10 +58,12 @@ namespace Polymer.Services.JsonLoader
             
             foreach (var connection in model.connections)
             {
-                _appData.Cables.Add(new Cable()
+                _appData.Cables.Add(new Cable
                 {
                     FromDeviceId = connection.a,
-                    ToDeviceId = connection.b
+                    ToDeviceId = connection.b,
+                    FromPortName = NullIfEmpty(connection.a_port),
+                    ToPortName = NullIfEmpty(connection.b_port)
                 });
             }
 

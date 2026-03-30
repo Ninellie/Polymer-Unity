@@ -14,6 +14,8 @@ namespace Core.Models
         public int FromPortId;
         public int ToDeviceId;
         public int ToPortId;
+        public string FromPortName;
+        public string ToPortName;
         public string CableType;
         public Color CableColor;
     }

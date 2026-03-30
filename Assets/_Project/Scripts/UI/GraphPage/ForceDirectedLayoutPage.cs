@@ -19,6 +19,7 @@ namespace Polymer.UI.GraphPage
         [SerializeField] private GraphScaler graphScaler;
         [SerializeField] private NodeHoverHighlighter hoverHighlighter;
         [SerializeField] private TextMeshProUGUI deviceDetails;
+        [SerializeField] private TextMeshProUGUI connectionDetails;
 
         [Inject] private ForceDirectedLayout _layout;
         [Inject] private NodesRenderer _nodesRenderer;
@@ -28,12 +29,14 @@ namespace Polymer.UI.GraphPage
         [Inject] private ApplicationData _appData;
 
         private GraphDeviceDetailsFormatter _deviceDetailsFormatter;
+        private GraphConnectionDetailsFormatter _connectionDetailsFormatter;
         private Node _draggedNode;
         private Vector2 _dragOffset;
 
         private void Start()
         {
-            _deviceDetailsFormatter = new GraphDeviceDetailsFormatter(_appData);
+            _deviceDetailsFormatter = new GraphDeviceDetailsFormatter();
+            _connectionDetailsFormatter = new GraphConnectionDetailsFormatter(_appData);
 
             if (hoverHighlighter != null)
             {
@@ -77,20 +80,40 @@ namespace Polymer.UI.GraphPage
 
         private void OnHoveredNodeChanged(Node node)
         {
-            if (deviceDetails == null) return;
+            var noUi = deviceDetails == null && connectionDetails == null;
+            if (noUi) return;
 
             if (node == null)
             {
-                deviceDetails.text = string.Empty;
+                if (deviceDetails != null)
+                {
+                    deviceDetails.text = string.Empty;
+                }
+
+                if (connectionDetails != null)
+                {
+                    connectionDetails.text = string.Empty;
+                }
+
                 return;
             }
 
             var device = _appData.Devices.FirstOrDefault(d => d.Id == node.Id);
-            deviceDetails.text = _deviceDetailsFormatter.Build(device, node);
+            if (deviceDetails != null)
+            {
+                deviceDetails.text = _deviceDetailsFormatter.Build(device);
+            }
+
+            if (connectionDetails != null)
+            {
+                connectionDetails.text = _connectionDetailsFormatter.Build(node.Id);
+            }
         }
 
         private void StartNodeDrag()
         {
+            if (hoverHighlighter == null) return;
+
             var hoveredNode = hoverHighlighter.HoveredNode;
             if (hoveredNode == null) return;
 
@@ -110,7 +133,11 @@ namespace Polymer.UI.GraphPage
             _draggedNode.IsFixed = false;
             _draggedNode.Velocity = Vector2.zero;
             _draggedNode = null;
-            hoverHighlighter.UnlockHover();
+            if (hoverHighlighter != null)
+            {
+                hoverHighlighter.UnlockHover();
+            }
+
             _layout.Start();
         }
 
